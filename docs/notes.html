@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>README</title>
+  <title>notes</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="https://strd6.github.io/cdn/parallel/docco.css" />
@@ -16,12 +16,62 @@
     <div class="pilwrap">
       <a class="pilcrow" href="#section-1">&#182;</a>
     </div>
-    <h1 id="chateau">chateau</h1>
-<p>Remake of thepalace.com</p>
+    <h1 id="firebase">Firebase</h1>
 
   </div>
   <div class="content"><pre><code>
 </code></pre>
+</div>
+</li>
+<li id="section-2">
+  <div class="annotation">
+    <div class="pilwrap">
+      <a class="pilcrow" href="#section-2">&#182;</a>
+    </div>
+    <h2 id="anonymous-sign-in">Anonymous Sign In</h2>
+
+  </div>
+  <div class="content"><pre><code>
+</code></pre>
+</div>
+</li>
+<li id="section-3">
+  <div class="annotation">
+    <div class="pilwrap">
+      <a class="pilcrow" href="#section-3">&#182;</a>
+    </div>
+    
+  </div>
+  <div class="content"><pre><code>firebase.auth().signInAnonymously()</code></pre>
+</div>
+</li>
+<li id="section-4">
+  <div class="annotation">
+    <div class="pilwrap">
+      <a class="pilcrow" href="#section-4">&#182;</a>
+    </div>
+    <p>This signs in anonymously and will keep the account when you return by
+persisting data in local storage.</p>
+<h2 id="handling-log-in">Handling Log In</h2>
+
+  </div>
+  <div class="content"><pre><code>
+</code></pre>
+</div>
+</li>
+<li id="section-5">
+  <div class="annotation">
+    <div class="pilwrap">
+      <a class="pilcrow" href="#section-5">&#182;</a>
+    </div>
+    <p>Detect when the user has logged in or out and firebase has finished initializing.</p>
+
+  </div>
+  <div class="content"><pre><code>firebase.auth().onAuthStateChanged (user) -&gt;
+  if user
+    # User is signed in.
+  else
+    # No user is signed in.</code></pre>
 </div>
 </li>
     </ul>
