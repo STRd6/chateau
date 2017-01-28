@@ -15,6 +15,6 @@ if PACKAGE.name is "ROOT"
     storageBucket: "chateau-f2799.appspot.com"
     messagingSenderId: "2073045470"
 
-  document.body.appendChild Chateau(firebase)
+  document.body.appendChild Chateau(firebase).element
 else
   module.exports = Chateau

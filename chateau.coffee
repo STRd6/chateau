@@ -1,5 +1,7 @@
 # Chat Based MUD
 
+ChateauTemplate = require "../templates/chateau"
+
 Drop = require "./lib/drop"
 
 sortBy = (attribute) ->
@@ -67,4 +69,18 @@ module.exports = (firebase) ->
 
   animate()
 
-  return canvas
+  self =
+    canvas: canvas
+    saySubmit: (e) ->
+      e.preventDefault()
+
+      input = e.currentTarget.querySelector('input')
+      words = input.value
+      if words
+        input.value = ""
+
+        console.log words
+
+  self.element = ChateauTemplate self
+
+  return self
