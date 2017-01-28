@@ -1,3 +1,5 @@
-
 width: 960
 height: 540
+remoteDependencies: [
+  "https://www.gstatic.com/firebasejs/3.6.7/firebase.js"
+]
