@@ -41,6 +41,9 @@ initialize = (firebase) ->
     else
       # No user is signed in.
 
+  firebase.database().ref("rooms").on "value", (rooms) ->
+    console.log "Rooms:", rooms.val()
+
 module.exports = (firebase) ->
   canvas = document.createElement 'canvas'
   canvas.width = 960
