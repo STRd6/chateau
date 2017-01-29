@@ -1,3 +1,5 @@
+- RoomList = require "./room-list"
+
 chateau
   = @canvas
   word-area
@@ -5,3 +7,4 @@ chateau
   form(submit=@saySubmit)
     input
     button Speak
+  = RoomList this

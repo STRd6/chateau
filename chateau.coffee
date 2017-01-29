@@ -1,7 +1,7 @@
 # Chat Based MUD
 
 ChateauTemplate = require "../templates/chateau"
-
+Observable = require "observable"
 Drop = require "./lib/drop"
 
 sortBy = (attribute) ->
@@ -35,7 +35,9 @@ drawRoom = (context, room) ->
 # TODO: If we call this too early it may needlessly swap anon accounts
 # firebase.auth().signInAnonymously()
 
-initialize = (firebase) ->
+initialize = (self) ->
+  {firebase} = self
+
   firebase.auth().onAuthStateChanged (user) ->
     console.log "User:", user
     if user
@@ -43,8 +45,20 @@ initialize = (firebase) ->
     else
       # No user is signed in.
 
+  firebase.database().ref("rooms/googol").set
+    backgroundURL: "https://www.gstatic.com/images/branding/googlelogo/2x/googlelogo_color_284x96dp.png"
+
   firebase.database().ref("rooms").on "value", (rooms) ->
-    console.log "Rooms:", rooms.val()
+    rooms = rooms.val()
+
+    results = Object.keys(rooms).map (id) ->
+      data = rooms[id]
+      data.name = id
+
+      data
+
+    self.rooms results
+    console.log "Rooms:", results
 
 module.exports = (firebase) ->
   canvas = document.createElement 'canvas'
@@ -52,11 +66,9 @@ module.exports = (firebase) ->
   canvas.height = 540
 
   context = canvas.getContext('2d')
-  
-  initialize(firebase)
 
   repaint = ->
-    context.fillStyle = 'blue'
+    context.fillStyle = 'white'
     context.fillRect(0, 0, canvas.width, canvas.height)
 
     drawRoom(context, roomData)
@@ -71,6 +83,8 @@ module.exports = (firebase) ->
 
   self =
     canvas: canvas
+    firebase: firebase
+    rooms: Observable []
     saySubmit: (e) ->
       e.preventDefault()
 
@@ -81,6 +95,18 @@ module.exports = (firebase) ->
 
         console.log words
 
-  self.element = ChateauTemplate self
+  initialize(self)
+
+  RoomTemplate = require "./templates/room"
+
+  presenter = Object.assign {}, self,
+    rooms: ->
+      self.rooms.map (room) ->
+        RoomTemplate Object.assign {}, room,
+          click: (e) ->
+            e.preventDefault()
+            console.log room.name
+
+  self.element = ChateauTemplate presenter
 
   return self

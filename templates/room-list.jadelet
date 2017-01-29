@@ -1,3 +1,2 @@
-- Room = require "./room"
-rooms
-  = @rooms.map Room
+rooms.show
+  = @rooms

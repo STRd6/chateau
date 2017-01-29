@@ -33,12 +33,29 @@ chateau
     margin: auto
 
   > rooms
+    border-left: 1px solid gray
+    height: 100%
+    left: 100%
+    padding: 1em
     position: absolute
-    right: 0
+    width: 200px
+
+    &.show
+      left: calc(100% - 200px)
 
     > room
-      display: block
+      display: flex
+      margin-bottom: 1em
       width: 200px
+
+      > img
+        border: 1px solid gray
+        width: 82px
+        height: 47px
+        flex: 0 0 auto
+
+      > span.name
+        margin: auto
 
   > form
     position: absolute
