@@ -11,6 +11,9 @@ sortBy = (attribute) ->
 rand = (n) ->
   Math.floor(Math.random() * n)
 
+accountId = null
+currentRoom = null
+
 roomData =
   backgroundImage: null
   avatars: []
@@ -24,7 +27,7 @@ drawRoom = (context, room) ->
   {backgroundImage, avatars, objects} = room
 
   if backgroundImage
-    context.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height)
+    context.drawImage(backgroundImage, 0, 0, context.width, context.height)
 
   # Draw Avatars/Objects
   Object.values(avatars)
@@ -37,11 +40,17 @@ drawRoom = (context, room) ->
 
 initialize = (self) ->
   {firebase} = self
+  db = firebase.database()
 
   firebase.auth().onAuthStateChanged (user) ->
     console.log "User:", user
     if user
       # User is signed in.
+      accountId = user.uid
+      # TODO: Load avatar data
+      db.ref("accounts/#{accountId}").on "value", (account) ->
+        console.log "Account:", account.val()
+        currentRoom = account.val().room
     else
       # No user is signed in.
 
@@ -61,11 +70,15 @@ initialize = (self) ->
     console.log "Rooms:", results
 
 module.exports = (firebase) ->
+  db = firebase.database()
+
   canvas = document.createElement 'canvas'
   canvas.width = 960
   canvas.height = 540
 
   context = canvas.getContext('2d')
+  context.width = canvas.width
+  context.height = canvas.height
 
   repaint = ->
     context.fillStyle = 'white'
@@ -85,6 +98,30 @@ module.exports = (firebase) ->
     canvas: canvas
     firebase: firebase
     rooms: Observable []
+    joinRoom: (room) ->
+      previousRoom = currentRoom
+      currentRoom = room.name
+
+      updates = {}
+      # Remove self from previous room
+      updates["rooms/#{previousRoom}/members/#{accountId}"] = null
+      # Add to current room
+      updates["rooms/#{currentRoom}/members/#{accountId}"] = true
+      # Update accout room ref
+      updates["accounts/#{accountId}/room"] = room.name
+
+      console.log updates
+
+      db.ref().update updates
+
+      bg = new Image
+      bg.src = room.backgroundURL
+
+      roomData =
+        backgroundImage: bg
+        avatars: []
+        objects: []
+
     saySubmit: (e) ->
       e.preventDefault()
 
@@ -105,7 +142,7 @@ module.exports = (firebase) ->
         RoomTemplate Object.assign {}, room,
           click: (e) ->
             e.preventDefault()
-            console.log room.name
+            self.joinRoom room
 
   self.element = ChateauTemplate presenter
 
