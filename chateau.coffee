@@ -47,7 +47,9 @@ initialize = (self) ->
     if user
       # User is signed in.
       accountId = user.uid
-      # TODO: Load avatar data
+      # TODO: Load real avatar data
+      db.ref("accounts/#{accountId}/avatarURL").set "https://s-media-cache-ak0.pinimg.com/originals/07/36/8f/07368f054eb6adc75e7c0d723457c1d3.gif"
+
       db.ref("accounts/#{accountId}").on "value", (account) ->
         console.log "Account:", account.val()
         currentRoom = account.val().room
@@ -101,6 +103,11 @@ module.exports = (firebase) ->
     joinRoom: (room) ->
       previousRoom = currentRoom
       currentRoom = room.name
+
+      # TODO: 
+      # db.ref("rooms/#{previousRoom}/members").off
+      db.ref("rooms/#{currentRoom}/members").on "value", (roomMembers) ->
+        console.log "Members:", roomMembers.val()
 
       updates = {}
       # Remove self from previous room
