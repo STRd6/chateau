@@ -5,3 +5,4 @@ remoteDependencies: [
 ]
 dependencies:
   observable: "distri/observable:master"
+  model: "distri/model:master"
