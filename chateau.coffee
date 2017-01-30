@@ -180,7 +180,7 @@ drawRoom = (context, room) ->
       context.drawImage(img, x - width / 2, y - height / 2)
 
 # TODO: If we call this too early it may needlessly swap anon accounts
-# firebase.auth().signInAnonymously()
+# 
 
 accountId = null
 initialize = (self) ->
@@ -188,11 +188,13 @@ initialize = (self) ->
   db = firebase.database()
 
   firebase.auth().onAuthStateChanged (user) ->
+    console.log "Start", user
     if user
       # User is signed in.
       accountId = user.uid
     else
       # No user is signed in.
+      firebase.auth().signInAnonymously()
 
   firebase.database().ref("rooms").once "value", (rooms) ->
     rooms = rooms.val()
@@ -217,6 +219,7 @@ module.exports = (firebase) ->
   context.width = canvas.width
   context.height = canvas.height
 
+  # TODO: Drag and move props
   canvas.onclick = (e) ->
     {pageX, pageY, currentTarget} = e
     {top, left} = currentTarget.getBoundingClientRect()
