@@ -1,7 +1,7 @@
 # Chat Based MUD
 
 ChateauTemplate = require "../templates/chateau"
-Observable = require "observable"
+{Observable} = require "ui"
 Drop = require "./lib/drop"
 
 sortBy = (attribute) ->

@@ -1,2 +1,6 @@
-rooms.show
-  = @rooms
+room-control.show
+  actions
+    button + New
+
+  rooms
+    = @rooms

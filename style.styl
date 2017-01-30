@@ -31,7 +31,7 @@ chateau
       position: absolute
       top: 0
       width: 100%
-  
+
       > words
         border: 1px solid black
         border-radius: 4px
@@ -40,7 +40,7 @@ chateau
         position: absolute
         display: inline-block
 
-  > rooms
+  > room-control
     border-left: 1px solid gray
     height: 100%
     left: 100%
@@ -48,23 +48,34 @@ chateau
     position: absolute
     width: 200px
 
+    > actions
+      display: block
+      margin-bottom: 1em
+
     &.show
       left: calc(100% - 200px)
 
-    > room
-      display: flex
-      margin-bottom: 1em
-      width: 200px
+    > rooms
+      display: block
 
-      > img
-        border: 1px solid gray
-        width: 82px
-        height: 47px
-        flex: 0 0 auto
+      > room
+        display: flex
+        margin-bottom: 1em
+        width: 200px
+  
+        > img
+          border: 1px solid gray
+          width: 82px
+          height: 47px
+          flex: 0 0 auto
+  
+        > span.name
+          margin: auto
 
-      > span.name
-        margin: auto
-
-  > form
+  > actions
     position: absolute
     bottom: 0
+
+    > form
+      display: inline-block
+      margin-right: 1em
