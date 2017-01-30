@@ -22,6 +22,7 @@ Member = (I={}, self=Model(I)) ->
   self.attrObservable "avatarURL", "x", "y", "text", "key"
 
   img = new Image
+  wordElement = document.createElement "words"
 
   update = (memberData) ->
     self.update memberData.val()
@@ -50,6 +51,9 @@ Member = (I={}, self=Model(I)) ->
 
       return self
 
+    wordElement: ->
+      wordElement
+
     sync: (db) ->
       db.ref("members/#{self.key()}").update
         x: self.x()
@@ -59,9 +63,20 @@ Member = (I={}, self=Model(I)) ->
       # TODO: Return promise for status?
       return self
 
+  updateTextPosition = ->
+    wordElement.style.left = "#{self.x()}px"
+    wordElement.style.top = "#{self.y() - 50}px"
+
   self.avatarURL.observe (url) ->
     console.log "settin", url
     img.src = url
+
+  self.text.observe (text) ->
+    wordElement.textContent = text
+    updateTextPosition()
+
+  self.x.observe updateTextPosition
+  self.y.observe updateTextPosition
 
   return self
 
@@ -209,7 +224,7 @@ module.exports = (firebase) ->
     x = pageX - left
     y = pageY - top
 
-    room?.updatePosition
+    self.currentRoom()?.updatePosition
       x: x
       y: y
 
@@ -217,27 +232,20 @@ module.exports = (firebase) ->
     context.fillStyle = 'white'
     context.fillRect(0, 0, canvas.width, canvas.height)
 
-    if room
+    if room = self.currentRoom()
       drawRoom(context, room)
 
     return
 
-  animate = ->
-    requestAnimationFrame animate
-    repaint()
-
-  animate()
-
-  room = null
-
   self =
     canvas: canvas
     firebase: firebase
+    currentRoom: Observable null
     rooms: Observable []
     joinRoom: ({name, backgroundURL}) ->
       return if name is room?.name()
 
-      room?.disconnect()
+      self.currentRoom()?.disconnect()
 
       room = Room
         name: name
@@ -247,6 +255,8 @@ module.exports = (firebase) ->
       .init db, accountId
       .connect()
 
+      self.currentRoom room
+
     saySubmit: (e) ->
       e.preventDefault()
 
@@ -255,7 +265,11 @@ module.exports = (firebase) ->
       if words
         input.value = ""
 
-        room?.updateText words
+        self.currentRoom()?.updateText words
+
+    words: ->
+      self.currentRoom()?.members.map (member) ->
+        member.wordElement()
 
   initialize(self)
 
@@ -270,5 +284,11 @@ module.exports = (firebase) ->
             self.joinRoom room
 
   self.element = ChateauTemplate presenter
+
+  animate = ->
+    requestAnimationFrame animate
+    repaint()
+
+  animate()
 
   return self
