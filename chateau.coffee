@@ -17,15 +17,14 @@ rand = (n) ->
 
 Model = require "model"
 Member = (I={}, self=Model(I)) ->
+  I.text ?= ""
+
   self.attrObservable "avatarURL", "x", "y", "text", "key"
 
   img = new Image
 
   update = (memberData) ->
-    dataValue = memberData.val()
-    console.log dataValue
-    Object.keys(dataValue).forEach (key) ->
-      self[key]? dataValue[key]
+    self.update memberData.val()
 
   self.extend
     img: ->
@@ -44,6 +43,21 @@ Member = (I={}, self=Model(I)) ->
     updatePosition: ({x, y}) ->
       self.x x
       self.y y
+
+    update: (data) ->
+      Object.keys(data).forEach (key) ->
+        self[key]? data[key]
+
+      return self
+
+    sync: (db) ->
+      db.ref("members/#{self.key()}").update
+        x: self.x()
+        y: self.y()
+        text: self.text()
+
+      # TODO: Return promise for status?
+      return self
 
   self.avatarURL.observe (url) ->
     console.log "settin", url
@@ -77,7 +91,7 @@ Room = (I={}, self=Model(I)) ->
   unsubscribeFromMember = ({key}) ->
     console.log "Unsub", key
 
-    [member] = 
+    member = self.memberByKey(key)
 
     if member
       self.members.remove member
@@ -115,14 +129,20 @@ Room = (I={}, self=Model(I)) ->
       db.ref("rooms/#{name}/members").off "child_added", subscribeToMember
       db.ref("rooms/#{name}/members").off "child_removed", unsubscribeFromMember
     
-    memberByKey = (key) ->
+    memberByKey: (key) ->
       [member] = self.members.filter (member) ->
         member.key() is key
 
       return member
 
     updatePosition: (pos) ->
-      memberByKey(accountId)?.updatePosition(pos)
+      self.memberByKey(accountId)?.update pos
+      .sync(db)
+
+    updateText: (text) ->
+      self.memberByKey(accountId)?.update
+        text: text
+      .sync(db)
 
 drawRoom = (context, room) ->
   backgroundImage = room.backgroundImage()
@@ -235,7 +255,7 @@ module.exports = (firebase) ->
       if words
         input.value = ""
 
-        console.log words
+        room?.updateText words
 
   initialize(self)
 
