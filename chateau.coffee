@@ -1,7 +1,7 @@
 # Chat Based MUD
 
 ChateauTemplate = require "../templates/chateau"
-{Observable} = require "ui"
+{Modal, Observable} = UI = require "ui"
 Drop = require "./lib/drop"
 
 sortBy = (attribute) ->
@@ -286,7 +286,47 @@ module.exports = (firebase) ->
             e.preventDefault()
             self.joinRoom room
 
-  self.element = ChateauTemplate presenter
+  self.element = element = ChateauTemplate presenter
+
+  Drop element, (e) ->
+    files = e.dataTransfer.files
+
+    if files.length
+      file = files[0]
+
+      console.log(file)
+      # Upload to CDN
+      uploadTask = firebase.storage().ref("test").put file
+
+      progressView = UI.Progress
+        value: 0
+        max: 1
+
+      Modal.show progressView.element,
+        cancellable: false
+
+      uploadTask.on 'state_changed', (snapshot) ->
+        progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+
+        progressView.value progress
+
+      , (error) ->
+        # Handle unsuccessful uploads
+        Modal.hide()
+        Modal.alert "An error occured: #{error.message}"
+      , () ->
+        # Handle successful uploads on complete
+        # For instance, get the download URL: https://firebasestorage.googleapis.com/...
+        Modal.hide()
+        downloadURL = uploadTask.snapshot.downloadURL
+
+        UI.Modal.form require("./templates/asset-form")()
+        .then (result) ->
+          switch result?.selection
+            when "avatar"
+              ;
+            when "background"
+              ;
 
   animate = ->
     requestAnimationFrame animate

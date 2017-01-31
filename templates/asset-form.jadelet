@@ -1,0 +1,12 @@
+form
+  h1 Use Image for:
+
+  label
+    input(type="radio" name="selection" value="avatar" checked="true")
+    h2 Avatar
+
+  label
+    input(type="radio" name="selection" value="background")
+    h2 Background
+
+  button Submit

@@ -1,8 +1,9 @@
 Chateau = require "./chateau"
   
 if PACKAGE.name is "ROOT"
+  {Style} = require "ui"
   style = document.createElement "style"
-  style.innerHTML = require("./style")
+  style.innerHTML = Style.all + "\n" + require("./style")
   document.head.appendChild style
 
   global.firebase = firebase
