@@ -4,6 +4,8 @@ ChateauTemplate = require "../templates/chateau"
 {Modal, Observable} = UI = require "ui"
 Drop = require "./lib/drop"
 
+shaUpload = require "./sha-upload"
+
 sortBy = (attribute) ->
   (a, b) ->
     a[attribute] - b[attribute]
@@ -295,31 +297,9 @@ module.exports = (firebase) ->
       file = files[0]
 
       console.log(file)
-      # Upload to CDN
-      uploadTask = firebase.storage().ref("test").put file
-
-      progressView = UI.Progress
-        value: 0
-        max: 1
-
-      Modal.show progressView.element,
-        cancellable: false
-
-      uploadTask.on 'state_changed', (snapshot) ->
-        progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-
-        progressView.value progress
-
-      , (error) ->
-        # Handle unsuccessful uploads
-        Modal.hide()
-        Modal.alert "An error occured: #{error.message}"
-      , () ->
-        # Handle successful uploads on complete
-        # For instance, get the download URL: https://firebasestorage.googleapis.com/...
-        Modal.hide()
-        downloadURL = uploadTask.snapshot.downloadURL
-
+      shaUpload(firebase, file)
+      .then (downloadURL) ->
+        console.log downloadURL
         UI.Modal.form require("./templates/asset-form")()
         .then (result) ->
           switch result?.selection
