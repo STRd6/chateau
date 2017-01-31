@@ -21,6 +21,7 @@ Model = require "model"
 Member = (I={}, self=Model(I)) ->
   I.text ?= ""
 
+  self.attrReader "accountId"
   self.attrObservable "avatarURL", "x", "y", "text", "key"
 
   img = new Image
@@ -34,12 +35,12 @@ Member = (I={}, self=Model(I)) ->
       img
 
     connect: (db) ->
-      db.ref("members/#{self.key()}").on "value", update
+      db.ref("members/#{self.accountId()}").on "value", update
 
       return self
 
     disconnect: (db) ->
-      db.ref("members/#{self.key()}").off "value", update
+      db.ref("members/#{self.accountId()}").off "value", update
 
       return self
 
@@ -57,7 +58,7 @@ Member = (I={}, self=Model(I)) ->
       wordElement
 
     sync: (db) ->
-      db.ref("members/#{self.key()}").update
+      db.ref("members/#{self.accountId()}").update
         x: self.x()
         y: self.y()
         text: self.text()
@@ -82,6 +83,15 @@ Member = (I={}, self=Model(I)) ->
 
   return self
 
+Member.fromAccountId = (db, id) ->
+  # TODO: Identity map account ids
+
+  new Promise (resolve, reject) ->
+    db.ref("members/#{id}").once "value", (data) ->
+      resolve Member Object.assign {}, data.val(),
+        accountId: id
+    , reject
+
 Prop = Member
 
 Room = (I={}, self=Model(I)) ->
@@ -90,7 +100,6 @@ Room = (I={}, self=Model(I)) ->
   self.attrModels "props", Prop
 
   db = null
-  accountId = null
 
   backgroundImage = new Image
   backgroundImage.src = I.backgroundURL
@@ -99,8 +108,8 @@ Room = (I={}, self=Model(I)) ->
     {key} = memberData
     console.log "Sub", key
 
-    member = Member()
-    member.key key
+    member = Member
+      accountId: key
     member.connect(db)
 
     self.members.push member
@@ -115,8 +124,7 @@ Room = (I={}, self=Model(I)) ->
       member.disconnect(db, key)
 
   self.extend
-    init: (_db, _accountId) ->
-      accountId = _accountId
+    init: (_db) ->
       db = _db
 
       return self
@@ -124,7 +132,7 @@ Room = (I={}, self=Model(I)) ->
     backgroundImage: ->
       backgroundImage
 
-    connect: ->
+    connect: (accountId) ->
       name = self.name()
 
       db.ref("rooms/#{name}/members").on "child_added", subscribeToMember
@@ -137,7 +145,7 @@ Room = (I={}, self=Model(I)) ->
 
       return self
 
-    disconnect: ->
+    disconnect: (accountId) ->
       name = self.name()
 
       # Remove self from previous room
@@ -152,16 +160,7 @@ Room = (I={}, self=Model(I)) ->
 
       return member
 
-    updatePosition: (pos) ->
-      self.memberByKey(accountId)?.update pos
-      .sync(db)
-
-    updateText: (text) ->
-      self.memberByKey(accountId)?.update
-        text: text
-      .sync(db)
-
-    sync: ->
+    sync: (db) ->
       # TODO: Switch to unique ids?
       db.ref("rooms/#{self.name()}").update
         backgroundURL: self.backgroundURL()
@@ -191,9 +190,6 @@ drawRoom = (context, room) ->
     if width and height
       context.drawImage(img, x - width / 2, y - height / 2)
 
-# TODO: If we call this too early it may needlessly swap anon accounts
-# 
-
 accountId = null
 initialize = (self) ->
   {firebase} = self
@@ -204,11 +200,14 @@ initialize = (self) ->
     if user
       # User is signed in.
       accountId = user.uid
+      
+      Member.fromAccountId(db, accountId)
+      .then self.currentUser
     else
       # No user is signed in.
       firebase.auth().signInAnonymously()
 
-  firebase.database().ref("rooms").once "value", (rooms) ->
+  db.ref("rooms").once "value", (rooms) ->
     rooms = rooms.val()
 
     results = Object.values(rooms)
@@ -236,9 +235,11 @@ module.exports = (firebase) ->
     x = pageX - left
     y = pageY - top
 
-    self.currentRoom()?.updatePosition
+    self.currentUser()
+    .update
       x: x
       y: y
+    .sync(db)
 
   repaint = ->
     context.fillStyle = 'white'
@@ -253,19 +254,23 @@ module.exports = (firebase) ->
     canvas: canvas
     firebase: firebase
     currentRoom: Observable null
+    currentUser: Observable null
     rooms: Observable []
     joinRoom: ({name, backgroundURL}) ->
       return if name is room?.name()
 
-      self.currentRoom()?.disconnect()
+      accountId = self.currentUser()?.accountId()
+      return unless accountId
+
+      self.currentRoom()?.disconnect(accountId)
 
       room = Room
         name: name
         backgroundURL: backgroundURL
         members: []
         objects: []
-      .init db, accountId
-      .connect()
+      .init db
+      .connect(accountId)
 
       self.currentRoom room
 
@@ -277,7 +282,9 @@ module.exports = (firebase) ->
       if words
         input.value = ""
 
-        self.currentRoom()?.updateText words
+        self.currentUser().update
+          text: words
+        .sync(db)
 
     words: ->
       self.currentRoom()?.members.map (member) ->
@@ -311,11 +318,15 @@ module.exports = (firebase) ->
         .then (result) ->
           switch result?.selection
             when "avatar"
-              ;
+              self.currentUser()
+              .update
+                avatarURL: downloadURL
+              .sync(db)
+
             when "background"
               room = self.currentRoom()
               room.backgroundURL(downloadURL)
-              room.sync()
+              room.sync(db)
 
   animate = ->
     requestAnimationFrame animate
