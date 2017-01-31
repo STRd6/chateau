@@ -161,6 +161,16 @@ Room = (I={}, self=Model(I)) ->
         text: text
       .sync(db)
 
+    sync: ->
+      # TODO: Switch to unique ids?
+      db.ref("rooms/#{self.name()}").update
+        backgroundURL: self.backgroundURL()
+
+  self.backgroundURL.observe (url) ->
+    backgroundImage.src = url
+
+  return self
+
 drawRoom = (context, room) ->
   backgroundImage = room.backgroundImage()
   members = room.members()
@@ -201,12 +211,9 @@ initialize = (self) ->
   firebase.database().ref("rooms").once "value", (rooms) ->
     rooms = rooms.val()
 
-    results = Object.keys(rooms).map (id) ->
-      data = rooms[id]
-      data.name = id
+    results = Object.values(rooms)
 
-      data
-
+    # TODO: Use room models for auto-binding
     self.rooms results
     console.log "Rooms:", results
 
@@ -306,7 +313,9 @@ module.exports = (firebase) ->
             when "avatar"
               ;
             when "background"
-              ;
+              room = self.currentRoom()
+              room.backgroundURL(downloadURL)
+              room.sync()
 
   animate = ->
     requestAnimationFrame animate
