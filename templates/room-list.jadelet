@@ -1,6 +1,6 @@
 room-control.show
   actions
-    button + New
+    button(click=@createRoom) + New
 
   rooms
     = @rooms

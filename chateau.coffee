@@ -17,165 +17,19 @@ rand = (n) ->
 # Listen to ref
 # Download BG
 
-Model = require "model"
-Member = (I={}, self=Model(I)) ->
-  I.text ?= ""
 
-  self.attrReader "accountId"
-  self.attrObservable "avatarURL", "x", "y", "text", "key"
-
-  img = new Image
-  wordElement = document.createElement "words"
-
-  update = (memberData) ->
-    self.update memberData.val()
-
-  self.extend
-    img: ->
-      img
-
-    connect: (db) ->
-      db.ref("members/#{self.accountId()}").on "value", update
-
-      return self
-
-    disconnect: (db) ->
-      db.ref("members/#{self.accountId()}").off "value", update
-
-      return self
-
-    updatePosition: ({x, y}) ->
-      self.x x
-      self.y y
-
-    update: (data) ->
-      Object.keys(data).forEach (key) ->
-        self[key]? data[key]
-
-      return self
-
-    wordElement: ->
-      wordElement
-
-    sync: (db) ->
-      db.ref("members/#{self.accountId()}").update
-        x: self.x()
-        y: self.y()
-        text: self.text()
-
-      # TODO: Return promise for status?
-      return self
-
-  updateTextPosition = ->
-    wordElement.style.left = "#{self.x()}px"
-    wordElement.style.top = "#{self.y() - 50}px"
-
-  self.avatarURL.observe (url) ->
-    console.log "settin", url
-    img.src = url
-
-  self.text.observe (text) ->
-    wordElement.textContent = text
-    updateTextPosition()
-
-  self.x.observe updateTextPosition
-  self.y.observe updateTextPosition
-
-  return self
-
-Member.fromAccountId = (db, id) ->
-  # TODO: Identity map account ids
-
-  new Promise (resolve, reject) ->
-    db.ref("members/#{id}").once "value", (data) ->
-      resolve Member Object.assign {}, data.val(),
-        accountId: id
-    , reject
+Member = require "./models/member"
+Room = require "./models/room"
 
 Prop = Member
 
-Room = (I={}, self=Model(I)) ->
-  self.attrObservable "backgroundURL", "name"
-  self.attrModels "members", Member
-  self.attrModels "props", Prop
-
-  db = null
-
-  backgroundImage = new Image
-  backgroundImage.src = I.backgroundURL
-
-  subscribeToMember = (memberData) ->
-    {key} = memberData
-    console.log "Sub", key
-
-    member = Member
-      accountId: key
-    member.connect(db)
-
-    self.members.push member
-
-  unsubscribeFromMember = ({key}) ->
-    console.log "Unsub", key
-
-    member = self.memberByKey(key)
-
-    if member
-      self.members.remove member
-      member.disconnect(db, key)
-
-  self.extend
-    init: (_db) ->
-      db = _db
-
-      return self
-
-    backgroundImage: ->
-      backgroundImage
-
-    connect: (accountId) ->
-      name = self.name()
-
-      db.ref("rooms/#{name}/members").on "child_added", subscribeToMember
-      db.ref("rooms/#{name}/members").on "child_removed", unsubscribeFromMember
-
-      # TODO: Should we do this changeover atomically?
-      # Add member to current room
-      db.ref("rooms/#{name}/members/#{accountId}").set true
-      db.ref("members/#{accountId}/room").set name
-
-      return self
-
-    disconnect: (accountId) ->
-      name = self.name()
-
-      # Remove self from previous room
-      db.ref("rooms/#{name}/members/#{accountId}").set null
-
-      db.ref("rooms/#{name}/members").off "child_added", subscribeToMember
-      db.ref("rooms/#{name}/members").off "child_removed", unsubscribeFromMember
-    
-    memberByKey: (key) ->
-      [member] = self.members.filter (member) ->
-        member.key() is key
-
-      return member
-
-    sync: (db) ->
-      # TODO: Switch to unique ids?
-      db.ref("rooms/#{self.name()}").update
-        backgroundURL: self.backgroundURL()
-
-  self.backgroundURL.observe (url) ->
-    backgroundImage.src = url
-
-  return self
 
 drawRoom = (context, room) ->
   backgroundImage = room.backgroundImage()
   members = room.members()
   props = room.props()
 
-  if backgroundImage
+  if backgroundImage?.width
     context.drawImage(backgroundImage, 0, 0, context.width, context.height)
 
   # Draw Avatars/Objects
@@ -200,21 +54,19 @@ initialize = (self) ->
     if user
       # User is signed in.
       accountId = user.uid
-      
-      Member.fromAccountId(db, accountId)
-      .then self.currentUser
+
+      self.currentUser Member.find(accountId).connect()
     else
       # No user is signed in.
       firebase.auth().signInAnonymously()
 
-  db.ref("rooms").once "value", (rooms) ->
-    rooms = rooms.val()
+  db.ref("rooms").on "child_added", (room) ->
+    key = room.key
+    room = room.val()
 
-    results = Object.values(rooms)
-
-    # TODO: Use room models for auto-binding
-    self.rooms results
-    console.log "Rooms:", results
+    console.log "Room:", room
+    self.rooms.push Room Object.assign {}, room,
+      key: key
 
 module.exports = (firebase) ->
   db = firebase.database()
@@ -256,21 +108,22 @@ module.exports = (firebase) ->
     currentRoom: Observable null
     currentUser: Observable null
     rooms: Observable []
-    joinRoom: ({name, backgroundURL}) ->
-      return if name is room?.name()
+    createRoom: ->
+      Modal.prompt("Room name", "cool guys")
+      .then (name) ->
+        if name
+          db.ref("rooms").push
+            name: name
 
-      accountId = self.currentUser()?.accountId()
+    joinRoom: (room) ->
+      return if room is self.currentRoom()
+
+      accountId = self.currentUser()?.key()
       return unless accountId
 
       self.currentRoom()?.disconnect(accountId)
 
-      room = Room
-        name: name
-        backgroundURL: backgroundURL
-        members: []
-        objects: []
-      .init db
-      .connect(accountId)
+      room.connect(accountId)
 
       self.currentRoom room
 
