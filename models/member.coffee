@@ -52,8 +52,9 @@ module.exports = Member = (I={}, self=Model(I)) ->
     wordElement: ->
       wordElement
 
-    sync: (db) ->
+    sync: ->
       ref.update
+        avatarURL: self.avatarURL()
         x: self.x()
         y: self.y()
         text: self.text()

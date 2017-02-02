@@ -174,12 +174,12 @@ module.exports = (firebase) ->
               self.currentUser()
               .update
                 avatarURL: downloadURL
-              .sync(db)
+              .sync()
 
             when "background"
               room = self.currentRoom()
               room.backgroundURL(downloadURL)
-              room.sync(db)
+              room.sync()
 
   animate = ->
     requestAnimationFrame animate

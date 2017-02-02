@@ -73,7 +73,7 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
       return member
 
-    sync: (db) ->
+    sync: ->
       ref.update
         backgroundURL: self.backgroundURL()
 
