@@ -63,9 +63,12 @@ module.exports = Member = (I={}, self=Model(I)) ->
 
       # TODO: Return promise for status?
 
+    height: ->
+      img.height | 0
+
   updateTextPosition = ->
     wordElement.style.left = "#{self.x()}px"
-    wordElement.style.top = "#{self.y() - 50}px"
+    wordElement.style.top = "#{self.y() - self.height()/2 - 30}px"
 
   self.avatarURL.observe (url) ->
     if url

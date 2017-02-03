@@ -120,14 +120,22 @@ chateau
 
 avatar-control
   display: block
-  padding: 1em
 
-  > avatar
+  > avatars
     display: block
-    margin-bottom: 1em
+    height: 100%
+    overflow: auto
+    padding: 1em
 
-    > img
-      max-width: 100%
+    > avatar
+      display: block
+      margin-bottom: 1em
+      
+      &:hover
+        background-color: lightyellow
+
+      > img
+        max-width: 100%
 
 room-control
   padding: 1em

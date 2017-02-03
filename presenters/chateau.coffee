@@ -6,7 +6,7 @@ AvatarPresenter = (avatar, self) ->
   AvatarTemplate Object.assign {}, avatar,
     click: (e) ->
       e.preventDefault()
-      self.setAvatar avatar
+      self.setAvatar avatar.avatarURL
 
 RoomPresenter = (room, self) ->
   RoomTemplate Object.assign {}, room,

@@ -36,13 +36,12 @@ drawRoom = (context, room) ->
   Object.values(members)
   .concat(props).sort(sortBy("z")).forEach (object) ->
     img = object.img()
-    x = object.x() | 0
-    y = object.y() | 0
-
     {width, height} = img
+    x = (object.x() - width / 2) | 0
+    y = (object.y() - height / 2) | 0
 
     if width and height
-      context.drawImage(img, x - width / 2, y - height / 2)
+      context.drawImage(img, x, y)
 
 accountId = null
 initialize = (self) ->
@@ -99,9 +98,16 @@ module.exports = (firebase) ->
     currentRoom: Observable null
     currentUser: Observable null
     currentFirebaseUser: Observable null
-    avatars: Observable [{
-      avatarURL: "https://1.pixiecdn.com/sprites/151181/original.png"
-    }]
+    avatars: Observable [
+      "https://1.pixiecdn.com/sprites/151181/original.png"
+      "https://1.pixiecdn.com/sprites/150973/original.png"
+      "https://3.pixiecdn.com/sprites/151199/original.png"
+      "https://3.pixiecdn.com/sprites/151187/original.png"
+      "https://0.pixiecdn.com/sprites/151140/original.png"
+      "https://3.pixiecdn.com/sprites/150719/original.png"
+      "https://1.pixiecdn.com/sprites/151149/original.png"
+      "https://2.pixiecdn.com/sprites/151046/original.png"
+    ].map (url) -> avatarURL: url
     rooms: Observable []
 
     anonLogin: (e) ->
@@ -123,6 +129,17 @@ module.exports = (firebase) ->
         if name
           db.ref("rooms").push
             name: name
+
+    setBackgroundURL: (backgroundURL) ->
+      room = self.currentRoom()
+      room.backgroundURL(backgroundURL)
+      room.sync()
+
+    setAvatar: (avatarURL) ->
+      self.currentUser()
+      .update
+        avatarURL: avatarURL
+      .sync()
 
     joinRoom: (room) ->
       return if room is self.currentRoom()
@@ -171,15 +188,10 @@ module.exports = (firebase) ->
         .then (result) ->
           switch result?.selection
             when "avatar"
-              self.currentUser()
-              .update
-                avatarURL: downloadURL
-              .sync()
+              self.setAvatar downloadURL
 
             when "background"
-              room = self.currentRoom()
-              room.backgroundURL(downloadURL)
-              room.sync()
+              self.setBackgroundURL downloadURL
 
   animate = ->
     requestAnimationFrame animate
