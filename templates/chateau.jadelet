@@ -5,11 +5,11 @@ chateau
     = @canvas
     word-area
       = @words
+
   actions
     form(submit=@saySubmit)
       input
       button Speak
-    button Settings
 
   - toggleOpen = (e) ->
     - # TODO: Close any other open tabs
@@ -26,3 +26,6 @@ chateau
 
     avatar-control
       tab(click=toggleOpen) Avatar
+
+    account-control
+      tab(click=toggleOpen) Account
