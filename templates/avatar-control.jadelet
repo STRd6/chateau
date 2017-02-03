@@ -1,0 +1,5 @@
+avatar-control
+  tab(click=@toggleOpen) Avatar
+
+  avatars
+    = @avatars

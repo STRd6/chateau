@@ -1,3 +1,4 @@
+- AvatarControl = require "./avatar-control"
 - RoomList = require "./room-list"
 
 chateau
@@ -11,21 +12,16 @@ chateau
       input
       button Speak
 
-  - toggleOpen = (e) ->
-    - # TODO: Close any other open tabs
-    - e.currentTarget.parentElement.classList.toggle "show"
-
   tab-drawer
     = RoomList this
 
     prop-control
-      tab(click=toggleOpen) Props
+      tab(click=@toggleOpen) Props
 
     sound-control
-      tab(click=toggleOpen) Sounds
+      tab(click=@toggleOpen) Sounds
 
-    avatar-control
-      tab(click=toggleOpen) Avatar
+    = AvatarControl(this)
 
     account-control
-      tab(click=toggleOpen) Account
+      tab(click=@toggleOpen) Account

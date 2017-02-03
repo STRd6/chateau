@@ -1,6 +1,6 @@
 # Chat Based MUD
 
-ChateauTemplate = require "../templates/chateau"
+ChateauPresenter = require "./presenters/chateau"
 {Modal, Observable} = UI = require "ui"
 Drop = require "./lib/drop"
 
@@ -99,6 +99,9 @@ module.exports = (firebase) ->
     currentRoom: Observable null
     currentUser: Observable null
     currentFirebaseUser: Observable null
+    avatars: Observable [{
+      avatarURL: "https://1.pixiecdn.com/sprites/151181/original.png"
+    }]
     rooms: Observable []
 
     anonLogin: (e) ->
@@ -151,17 +154,7 @@ module.exports = (firebase) ->
 
   initialize(self)
 
-  RoomTemplate = require "./templates/room"
-
-  presenter = Object.assign {}, self,
-    rooms: ->
-      self.rooms.map (room) ->
-        RoomTemplate Object.assign {}, room,
-          click: (e) ->
-            e.preventDefault()
-            self.joinRoom room
-
-  self.element = element = ChateauTemplate presenter
+  self.element = element = ChateauPresenter self
 
   Drop element, (e) ->
     files = e.dataTransfer.files

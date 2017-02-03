@@ -1,8 +1,5 @@
-- toggleOpen = (e) ->
-  - e.currentTarget.parentElement.classList.toggle "show"
-
 room-control
-  tab(click=toggleOpen) Rooms
+  tab(click=@toggleOpen) Rooms
 
   actions
     button(click=@createRoom) + New
