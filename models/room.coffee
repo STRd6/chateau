@@ -20,8 +20,9 @@ module.exports = Room = (I={}, self=Model(I)) ->
   backgroundImage.src = I.backgroundURL
 
   subscribeToMember = (memberData) ->
+    stats.increment "subscribeToMember"
+
     {key} = memberData
-    console.log "Sub", key
 
     member = Member.find key
     member.connect()
@@ -29,7 +30,7 @@ module.exports = Room = (I={}, self=Model(I)) ->
     self.members.push member
 
   unsubscribeFromMember = ({key}) ->
-    console.log "Unsub", key
+    stats.increment "unsubscribeFromMember"
 
     member = self.memberByKey(key)
 
@@ -44,11 +45,13 @@ module.exports = Room = (I={}, self=Model(I)) ->
       backgroundImage
 
     connect: (accountId) ->
+      stats.increment("room-connect")
+
       key = self.key()
 
       ref.child("memberships").on "child_added", subscribeToMember
       ref.child("memberships").on "child_removed", unsubscribeFromMember
-      
+
       ref.child("backgroundURL").on "value", updateBackgroundURL
 
       # Add member to current room
@@ -57,6 +60,8 @@ module.exports = Room = (I={}, self=Model(I)) ->
       return self
 
     disconnect: (accountId) ->
+      stats.increment("room-disconnect")
+
       key = self.key()
 
       # Remove self from previous room

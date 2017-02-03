@@ -1,8 +1,6 @@
 Model = require "model"
 
 module.exports = Member = (I={}, self=Model(I)) ->
-  console.log "memb", I
-
   I.text ?= ""
 
   self.attrReader "key"
@@ -12,6 +10,7 @@ module.exports = Member = (I={}, self=Model(I)) ->
   wordElement = document.createElement "words"
 
   update = (memberData) ->
+    console.log "update", memberData.val()
     self.update memberData.val()
 
   table = db.ref("members")
@@ -44,7 +43,10 @@ module.exports = Member = (I={}, self=Model(I)) ->
       self.y y
 
     update: (data) ->
+      return unless data
+
       Object.keys(data).forEach (key) ->
+        console.log "update", key, data[key]
         self[key]? data[key]
 
       return self

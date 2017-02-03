@@ -54,7 +54,7 @@ initialize = (self) ->
     key = room.key
     room = room.val()
 
-    console.log "Room:", room
+    logger.info "Room:", room
     self.rooms.push Room Object.assign {}, room,
       key: key
 
@@ -98,6 +98,7 @@ module.exports = (firebase) ->
     firebase: firebase
     currentRoom: Observable null
     currentUser: Observable null
+    currentFirebaseUser: Observable null
     rooms: Observable []
 
     anonLogin: (e) ->
@@ -166,12 +167,13 @@ module.exports = (firebase) ->
     files = e.dataTransfer.files
 
     if files.length
+      # TODO: Process multiple files
       file = files[0]
 
-      console.log(file)
+      stats.increment "drop-file"
+
       shaUpload(firebase, file)
       .then (downloadURL) ->
-        console.log downloadURL
         Modal.form require("./templates/asset-form")()
         .then (result) ->
           switch result?.selection
@@ -195,6 +197,7 @@ module.exports = (firebase) ->
   db.ref(".info/connected").on "value", (snap) ->
     if snap.val()
       self.status "Connected"
+      stats.increment "connect"
     else
       self.status "Connecting..."
 
@@ -205,15 +208,16 @@ module.exports = (firebase) ->
 
   # Initialize auth state
   removeListener = firebase.auth().onAuthStateChanged (user) ->
-    console.log "Start", user
+    logger.info "Start", user
     if user
       # User is signed in.
       accountId = user.uid
-  
+
       Modal.hide()
       removeListener()
-  
+
       # TODO: Auto-connect to last room
+      self.currentFirebaseUser user
       self.currentUser Member.find(accountId).connect()
     else
       # No user is signed in.

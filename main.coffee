@@ -14,6 +14,8 @@ if PACKAGE.name is "ROOT"
     storageBucket: "chateau-f2799.appspot.com"
     messagingSenderId: "2073045470"
 
+  global.logger = require("./lib/logger")(console.log)
+  global.stats = require("./lib/stats")()
   global.firebase = firebase
   global.db = firebase.database()
   global.defaults = require("./util").defaults
