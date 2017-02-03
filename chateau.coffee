@@ -49,17 +49,7 @@ initialize = (self) ->
   {firebase} = self
   db = firebase.database()
 
-  firebase.auth().onAuthStateChanged (user) ->
-    console.log "Start", user
-    if user
-      # User is signed in.
-      accountId = user.uid
-
-      self.currentUser Member.find(accountId).connect()
-    else
-      # No user is signed in.
-      firebase.auth().signInAnonymously()
-
+  # Populate Rooms list
   db.ref("rooms").on "child_added", (room) ->
     key = room.key
     room = room.val()
@@ -103,11 +93,26 @@ module.exports = (firebase) ->
     return
 
   self =
+    status: Observable "Connecting..."
     canvas: canvas
     firebase: firebase
     currentRoom: Observable null
     currentUser: Observable null
     rooms: Observable []
+
+    anonLogin: (e) ->
+      e.preventDefault()
+
+      firebase.auth().signInAnonymously()
+
+    googleLogin: (e) ->
+      e.preventDefault()
+
+      provider = new firebase.auth.GoogleAuthProvider()
+      provider.addScope('profile')
+      provider.addScope('email')
+      firebase.auth().signInWithPopup(provider)
+
     createRoom: ->
       Modal.prompt("Room name", "cool guys")
       .then (name) ->
@@ -167,7 +172,7 @@ module.exports = (firebase) ->
       shaUpload(firebase, file)
       .then (downloadURL) ->
         console.log downloadURL
-        UI.Modal.form require("./templates/asset-form")()
+        Modal.form require("./templates/asset-form")()
         .then (result) ->
           switch result?.selection
             when "avatar"
@@ -186,5 +191,34 @@ module.exports = (firebase) ->
     repaint()
 
   animate()
+
+  db.ref(".info/connected").on "value", (snap) ->
+    if snap.val()
+      self.status "Connected"
+    else
+      self.status "Connecting..."
+
+  progressView = UI.Progress
+    message: "Initializing..."
+  Modal.show progressView.element,
+    cancellable: false
+
+  # Initialize auth state
+  removeListener = firebase.auth().onAuthStateChanged (user) ->
+    console.log "Start", user
+    if user
+      # User is signed in.
+      accountId = user.uid
+  
+      Modal.hide()
+      removeListener()
+  
+      # TODO: Auto-connect to last room
+      self.currentUser Member.find(accountId).connect()
+    else
+      # No user is signed in.
+      loginTemplate = require("./templates/login")(self)
+      Modal.show loginTemplate,
+        cancellable: false
 
   return self

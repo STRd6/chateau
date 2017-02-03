@@ -1,0 +1,11 @@
+form#login
+  h1 Connect to Chateau
+
+  label
+    h2 Server Status
+    span= @status
+
+  h2 Log in with
+
+  button(click=@anonLogin) Anon
+  button(click=@googleLogin) Google

@@ -26,9 +26,9 @@ module.exports = (firebase, file) ->
 
       uploadTask.on 'state_changed', (snapshot) ->
         progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-    
+
         progressView.value progress
-    
+
       , (error) ->
         # Handle unsuccessful uploads
         Modal.hide()

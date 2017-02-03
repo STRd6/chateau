@@ -1,5 +1,5 @@
 Chateau = require "./chateau"
-  
+
 if PACKAGE.name is "ROOT"
   {Style} = require "ui"
   style = document.createElement "style"

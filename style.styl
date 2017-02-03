@@ -11,16 +11,17 @@ body
   margin: 0
   overflow: hidden
 
+label
+  display: block
+  margin: 1em 0
+
+  > h2
+    display: inline-block
+    font-size: 1em
+    margin: 0 4px 0 0
+
 form
   > label
-    display: block
-    margin: 1em 0
-
-    > h2
-      display: inline-block
-      font-size: 1em
-      margin: 0
-
     > input[type="radio"]
       margin-right: 4px
       vertical-align: baseline
@@ -37,9 +38,10 @@ tab-drawer
     height: 100%
     left: 0
     position: absolute
-    transition-property: left
+    transition-property: left, z-index
     transition-duration: 0.25s
     width: 200px
+    z-index: 0
 
     > tab
       background-color: white
@@ -64,7 +66,7 @@ tab-drawer
 
   > *.show
     left: -200px
-    z-index: 1
+    z-index: 60
 
     > tab
       &::before
@@ -144,3 +146,7 @@ room-control
         flex: 1 1 auto
         margin: auto
         padding-left: 1em
+
+form#login
+  display: block
+  padding: 2em
