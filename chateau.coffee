@@ -23,7 +23,6 @@ Room = require "./models/room"
 
 Prop = Member
 
-
 drawRoom = (context, room) ->
   backgroundImage = room.backgroundImage()
   members = room.members()
@@ -42,6 +41,17 @@ drawRoom = (context, room) ->
 
     if width and height
       context.drawImage(img, x, y)
+
+drawAvatar = (context, member) ->
+  return unless member
+
+  img = member.img()
+  {width, height} = img
+  x = ((context.width - width) / 2) | 0
+  y = ((context.height - height) / 2) | 0
+
+  if width and height
+    context.drawImage(img, x, y)
 
 initialize = (self) ->
 
@@ -86,6 +96,8 @@ module.exports = (firebase) ->
 
     if room = self.currentRoom()
       drawRoom(context, room)
+    else if user = self.currentUser()
+      drawAvatar(context, user)
 
     return
 
@@ -124,8 +136,24 @@ module.exports = (firebase) ->
 
       self.displayModalLoader "Loading..."
       user.connect().then ->
-        # TODO: Display Avatar Drawer unless user has avatar
+        Modal.hide()
 
+        # Display Avatar Drawer unless user has avatar
+        new Promise (resolve, reject) ->
+          if user.avatarURL()
+            resolve()
+          else
+            self.element.querySelectorAll("tab-drawer > *").forEach (element) ->
+              element.classList.remove("show")
+            self.element.querySelector("avatar-control").classList.add("show")
+
+            checkForAvatarURL = (value) ->
+              if value
+                user.avatarURL.stopObserving checkForAvatarURL
+                resolve()
+
+            user.avatarURL.observe checkForAvatarURL
+      .then ->
         # Connect to previously connected room
         previousRoom = Room.find(user.roomId())
         if previousRoom
@@ -136,10 +164,6 @@ module.exports = (firebase) ->
           self.element.querySelectorAll("tab-drawer > *").forEach (element) ->
             element.classList.remove("show")
           self.element.querySelector("room-control").classList.add("show")
-      .catch (e) ->
-        console.log "errrr", e
-      .finally ->
-        Modal.hide()
 
     anonLogin: (e) ->
       e.preventDefault()
