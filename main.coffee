@@ -22,5 +22,7 @@ if PACKAGE.name is "ROOT"
   global.chateau = Chateau(firebase)
 
   document.body.appendChild chateau.element
+
+  document.body.appendChild require("./lib/feedback-tab")("https://docs.google.com/forms/d/e/1FAIpQLScMur8T8VcgWGk0k-sFkNRmCiDGWAzTRTLICUC0v-W2J7rJKQ/viewform")
 else
   module.exports = Chateau
