@@ -1,5 +1,6 @@
 Model = require "model"
 
+Drawable = require "./drawable"
 Member = require "./member"
 Prop = require "./prop"
 
@@ -9,15 +10,14 @@ module.exports = Room = (I={}, self=Model(I)) ->
     props: []
 
   self.attrReader "key"
-  self.attrObservable "backgroundURL", "name"
+  self.include Drawable
+
+  self.attrObservable "name"
   self.attrModels "members", Member
   self.attrModels "props", Prop
 
   table = db.ref("rooms")
   ref = table.child(self.key())
-
-  backgroundImage = new Image
-  backgroundImage.src = I.backgroundURL
 
   subscribeToProp = (snap) ->
     stats.increment "room.subscribe-prop"
@@ -61,7 +61,7 @@ module.exports = Room = (I={}, self=Model(I)) ->
       self.members.remove member
       member.disconnect()
 
-  updateBackgroundURL = V self.backgroundURL
+  updateBackgroundURL = V self.imageURL
 
   self.extend
     addProp: ({imageURL}) ->
@@ -69,9 +69,6 @@ module.exports = Room = (I={}, self=Model(I)) ->
         x: (Math.random() * 960)|0
         y: (Math.random() * 540)|0
         imageURL: imageURL
-
-    backgroundImage: ->
-      backgroundImage
 
     clearAllProps: ->
       ref.child("props").remove()
@@ -83,7 +80,7 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
       ref.child("memberships").on "child_added", subscribeToMember
       ref.child("memberships").on "child_removed", unsubscribeFromMember
-      
+
       ref.child("props").on "child_added", subscribeToProp
       ref.child("props").on "child_removed", unsubscribeFromProp
 
@@ -138,11 +135,8 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
     sync: ->
       ref.update
-        backgroundURL: self.backgroundURL()
-
-  self.backgroundURL.observe (url) ->
-    if url
-      backgroundImage.src = url
+        imageURL: self.imageURL()
+        name: self.name()
 
   return self
 

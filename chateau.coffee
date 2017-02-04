@@ -24,7 +24,7 @@ Room = require "./models/room"
 Prop = Member
 
 drawRoom = (context, room) ->
-  backgroundImage = room.backgroundImage()
+  backgroundImage = room.img()
   members = room.members()
   props = room.props()
 
@@ -61,7 +61,7 @@ initialize = (self) ->
 
     delete value.props
 
-    stats.increment "room.added"
+    stats.increment "rooms.child_added"
     room = Room.find(key).update value
 
     self.rooms.push room
@@ -153,7 +153,7 @@ module.exports = (firebase) ->
 
         # Display Avatar Drawer unless user has avatar
         new Promise (resolve, reject) ->
-          if user.avatarURL()
+          if user.imageURL()
             resolve()
           else
             self.element.querySelectorAll("tab-drawer > *").forEach (element) ->
@@ -162,10 +162,10 @@ module.exports = (firebase) ->
 
             checkForAvatarURL = (value) ->
               if value
-                user.avatarURL.stopObserving checkForAvatarURL
+                user.imageURL.stopObserving checkForAvatarURL
                 resolve()
 
-            user.avatarURL.observe checkForAvatarURL
+            user.imageURL.observe checkForAvatarURL
       .then ->
         # Connect to previously connected room
         previousRoom = Room.find(user.roomId())
@@ -207,13 +207,13 @@ module.exports = (firebase) ->
 
     setBackgroundURL: (backgroundURL) ->
       room = self.currentRoom()
-      room.backgroundURL(backgroundURL)
+      room.imageURL(backgroundURL)
       room.sync()
 
     setAvatar: (avatarURL) ->
       self.currentUser()
       .update
-        avatarURL: avatarURL
+        imageURL: avatarURL
       .sync()
 
     joinRoom: (room, force) ->
