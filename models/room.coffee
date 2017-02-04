@@ -57,7 +57,6 @@ module.exports = Room = (I={}, self=Model(I)) ->
       # Add member to current room
       ref.child("memberships/#{accountId}").set true
       ref.child("memberships/#{accountId}").onDisconnect().remove()
-      
 
       return self
 
@@ -89,6 +88,9 @@ module.exports = Room = (I={}, self=Model(I)) ->
         member.key() is key
 
       return member
+
+    numberOfCurrentOccupants: ->
+      self.members.length
 
     sync: ->
       ref.update

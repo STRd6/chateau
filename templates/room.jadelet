@@ -1,3 +1,8 @@
 room(@click)
   img(src=@backgroundURL)
-  span.name= @name
+  div.details
+    span.name= @name
+    br
+    span.occupants
+      = "👤 "
+      = @numberOfCurrentOccupants
