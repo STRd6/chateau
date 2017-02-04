@@ -124,17 +124,18 @@ module.exports = (firebase) ->
 
       self.displayModalLoader "Loading..."
       user.connect().then ->
-        # TODO: Display avatar drawer if no avatar
-        console.log "connnn"
+        # TODO: Display Avatar Drawer unless user has avatar
 
         # Connect to previously connected room
         previousRoom = Room.find(user.roomId())
         if previousRoom
-          console.log "prev"
+          # Need to force join because currentRoom will be equal to previousRoom
           self.joinRoom previousRoom, true
         else
-          console.log "no prev"
-          # TODO: Display Rooms drawer
+          # Display Rooms drawer
+          self.element.querySelectorAll("tab-drawer > *").forEach (element) ->
+            element.classList.remove("show")
+          self.element.querySelector("room-control").classList.add("show")
       .catch (e) ->
         console.log "errrr", e
       .finally ->
