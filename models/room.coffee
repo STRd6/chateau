@@ -56,6 +56,8 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
       # Add member to current room
       ref.child("memberships/#{accountId}").set true
+      ref.child("memberships/#{accountId}").onDisconnect().remove()
+      
 
       return self
 
@@ -66,11 +68,21 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
       # Remove self from previous room
       ref.child("memberships/#{accountId}").set null
+      ref.child("memberships/#{accountId}").onDisconnect().cancel()
 
       ref.child("backgroundURL").off "value", updateBackgroundURL
 
       ref.child("memberships").off "child_added", subscribeToMember
       ref.child("memberships").off "child_removed", unsubscribeFromMember
+
+    update: (data) ->
+      return unless data
+      stats.increment "room.update"
+
+      Object.keys(data).forEach (key) ->
+        self[key]? data[key]
+
+      return self
 
     memberByKey: (key) ->
       [member] = self.members.filter (member) ->
@@ -90,6 +102,8 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
 identityMap = {}
 Room.find = (id) ->
+  return unless id
+
   identityMap[id] ?= Room
     key: id
 

@@ -43,19 +43,17 @@ drawRoom = (context, room) ->
     if width and height
       context.drawImage(img, x, y)
 
-accountId = null
 initialize = (self) ->
-  {firebase} = self
-  db = firebase.database()
 
   # Populate Rooms list
   db.ref("rooms").on "child_added", (room) ->
     key = room.key
-    room = room.val()
+    value = room.val()
 
-    logger.info "Room:", room
-    self.rooms.push Room Object.assign {}, room,
-      key: key
+    stats.increment "room.added"
+    room = Room.find(key).update value
+
+    self.rooms.push room
 
 module.exports = (firebase) ->
   db = firebase.database()
@@ -94,11 +92,14 @@ module.exports = (firebase) ->
   self =
     status: Observable "Connecting..."
     canvas: canvas
-    firebase: firebase
-    currentRoom: Observable null
+    currentRoom: ->
+      Room.find self.currentUser()?.roomId()
     currentUser: Observable null
     currentFirebaseUser: Observable null
     avatars: Observable [
+      "https://1.pixiecdn.com/sprites/148517/original.png"
+      "https://0.pixiecdn.com/sprites/148468/original.png"
+      "https://1.pixiecdn.com/sprites/147597/original.png"
       "https://1.pixiecdn.com/sprites/151181/original.png"
       "https://1.pixiecdn.com/sprites/150973/original.png"
       "https://3.pixiecdn.com/sprites/151199/original.png"
@@ -109,6 +110,35 @@ module.exports = (firebase) ->
       "https://2.pixiecdn.com/sprites/151046/original.png"
     ].map (url) -> avatarURL: url
     rooms: Observable []
+
+    displayModalLoader: (message) ->
+      progressView = UI.Progress
+        message: message
+      Modal.show progressView.element,
+        cancellable: false
+
+    accountConnected: (firebaseUser) ->
+      self.currentFirebaseUser firebaseUser
+      user = Member.find(firebaseUser.uid)
+      self.currentUser user
+
+      self.displayModalLoader "Loading..."
+      user.connect().then ->
+        # TODO: Display avatar drawer if no avatar
+        console.log "connnn"
+
+        # Connect to previously connected room
+        previousRoom = Room.find(user.roomId())
+        if previousRoom
+          console.log "prev"
+          self.joinRoom previousRoom, true
+        else
+          console.log "no prev"
+          # TODO: Display Rooms drawer
+      .catch (e) ->
+        console.log "errrr", e
+      .finally ->
+        Modal.hide()
 
     anonLogin: (e) ->
       e.preventDefault()
@@ -141,17 +171,24 @@ module.exports = (firebase) ->
         avatarURL: avatarURL
       .sync()
 
-    joinRoom: (room) ->
-      return if room is self.currentRoom()
+    joinRoom: (room, force) ->
+      if !force and room is self.currentRoom()
+        return
 
-      accountId = self.currentUser()?.key()
+      user = self.currentUser()
+
+      accountId = user?.key()
       return unless accountId
 
       self.currentRoom()?.disconnect(accountId)
-
       room.connect(accountId)
 
-      self.currentRoom room
+      user.roomId room.key()
+      user.sync()
+      
+      console.log "croom", self.currentRoom()?.I
+
+      return
 
     saySubmit: (e) ->
       e.preventDefault()
@@ -206,24 +243,17 @@ module.exports = (firebase) ->
     else
       self.status "Connecting..."
 
-  progressView = UI.Progress
-    message: "Initializing..."
-  Modal.show progressView.element,
-    cancellable: false
+  self.displayModalLoader("Initializing...")
 
   # Initialize auth state
   removeListener = firebase.auth().onAuthStateChanged (user) ->
     logger.info "Start", user
     if user
       # User is signed in.
-      accountId = user.uid
-
       Modal.hide()
       removeListener()
 
-      # TODO: Auto-connect to last room
-      self.currentFirebaseUser user
-      self.currentUser Member.find(accountId).connect()
+      self.accountConnected(user)
     else
       # No user is signed in.
       loginTemplate = require("./templates/login")(self)
