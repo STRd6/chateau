@@ -59,6 +59,8 @@ initialize = (self) ->
     key = room.key
     value = room.val()
 
+    delete value.props
+
     stats.increment "room.added"
     room = Room.find(key).update value
 
@@ -196,8 +198,12 @@ module.exports = (firebase) ->
           db.ref("rooms").push
             name: name
 
+    clearAllProps: ->
+      self.currentRoom().clearAllProps()
+
     addProp: (prop) ->
-      console.log prop
+      stats.increment "prop.add"
+      self.currentRoom().addProp prop
 
     setBackgroundURL: (backgroundURL) ->
       room = self.currentRoom()

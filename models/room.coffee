@@ -23,8 +23,10 @@ module.exports = Room = (I={}, self=Model(I)) ->
     stats.increment "room.subscribe-prop"
 
     {key} = snap
+    value = snap.val()
 
     prop = Prop.find key
+    prop.update(value)
     prop.connect()
 
     unless self.propByKey(key)
@@ -62,8 +64,17 @@ module.exports = Room = (I={}, self=Model(I)) ->
   updateBackgroundURL = V self.backgroundURL
 
   self.extend
+    addProp: ({imageURL}) ->
+      ref.child("props").push
+        x: (Math.random() * 960)|0
+        y: (Math.random() * 540)|0
+        imageURL: imageURL
+
     backgroundImage: ->
       backgroundImage
+
+    clearAllProps: ->
+      ref.child("props").remove()
 
     connect: (accountId) ->
       stats.increment("room-connect")
@@ -115,6 +126,12 @@ module.exports = Room = (I={}, self=Model(I)) ->
         member.key() is key
 
       return member
+
+    propByKey: (key) ->
+      [prop] = self.props.filter (prop) ->
+        prop.key() is key
+
+      return prop
 
     numberOfCurrentOccupants: ->
       self.members.length
