@@ -1,0 +1,5 @@
+prop-control
+  tab(click=@toggleOpen) Props
+  
+  props
+    = @props

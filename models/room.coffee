@@ -1,7 +1,7 @@
 Model = require "model"
 
 Member = require "./member"
-Prop = Member
+Prop = require "./prop"
 
 module.exports = Room = (I={}, self=Model(I)) ->
   defaults I,
@@ -19,18 +19,39 @@ module.exports = Room = (I={}, self=Model(I)) ->
   backgroundImage = new Image
   backgroundImage.src = I.backgroundURL
 
+  subscribeToProp = (snap) ->
+    stats.increment "room.subscribe-prop"
+
+    {key} = snap
+
+    prop = Prop.find key
+    prop.connect()
+
+    unless self.propByKey(key)
+      self.props.push prop
+
+  unsubscribeFromProp = ({key}) ->
+    stats.increment "room.unsubscribe-prop"
+
+    prop = self.propByKey(key)
+
+    if prop
+      self.props.remove prop
+      prop.disconnect()
+
   subscribeToMember = (memberData) ->
-    stats.increment "subscribeToMember"
+    stats.increment "room.subscribe-member"
 
     {key} = memberData
 
     member = Member.find key
     member.connect()
 
-    self.members.push member
+    unless self.memberByKey(key)
+      self.members.push member
 
   unsubscribeFromMember = ({key}) ->
-    stats.increment "unsubscribeFromMember"
+    stats.increment "room.unsubscribe-member"
 
     member = self.memberByKey(key)
 
@@ -51,6 +72,9 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
       ref.child("memberships").on "child_added", subscribeToMember
       ref.child("memberships").on "child_removed", unsubscribeFromMember
+      
+      ref.child("props").on "child_added", subscribeToProp
+      ref.child("props").on "child_removed", unsubscribeFromProp
 
       ref.child("backgroundURL").on "value", updateBackgroundURL
 
@@ -70,6 +94,9 @@ module.exports = Room = (I={}, self=Model(I)) ->
       ref.child("memberships/#{accountId}").onDisconnect().cancel()
 
       ref.child("backgroundURL").off "value", updateBackgroundURL
+
+      ref.child("props").off "child_removed", unsubscribeFromProp
+      ref.child("props").off "child_added", subscribeToProp
 
       ref.child("memberships").off "child_added", subscribeToMember
       ref.child("memberships").off "child_removed", unsubscribeFromMember

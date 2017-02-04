@@ -1,4 +1,5 @@
 - AvatarControl = require "./avatar-control"
+- PropControl = require "./prop-control"
 - RoomList = require "./room-list"
 
 chateau
@@ -15,8 +16,7 @@ chateau
   tab-drawer
     = RoomList this
 
-    prop-control
-      tab(click=@toggleOpen) Props
+    = PropControl(this)
 
     sound-control
       tab(click=@toggleOpen) Sounds

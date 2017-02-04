@@ -54,7 +54,6 @@ drawAvatar = (context, member) ->
     context.drawImage(img, x, y)
 
 initialize = (self) ->
-
   # Populate Rooms list
   db.ref("rooms").on "child_added", (room) ->
     key = room.key
@@ -111,6 +110,7 @@ module.exports = (firebase) ->
     avatars: Observable [
       "https://1.pixiecdn.com/sprites/148517/original.png"
       "https://0.pixiecdn.com/sprites/148468/original.png"
+      "https://2.pixiecdn.com/sprites/137922/original.png"
       "https://1.pixiecdn.com/sprites/147597/original.png"
       "https://1.pixiecdn.com/sprites/151181/original.png"
       "https://1.pixiecdn.com/sprites/150973/original.png"
@@ -122,6 +122,17 @@ module.exports = (firebase) ->
       "https://2.pixiecdn.com/sprites/151046/original.png"
     ].map (url) -> avatarURL: url
     rooms: Observable []
+    props: Observable [
+      "https://1.pixiecdn.com/sprites/151213/original.png"
+      "https://3.pixiecdn.com/sprites/151203/original.png"
+      "https://0.pixiecdn.com/sprites/148204/original.png"
+      "https://1.pixiecdn.com/sprites/148365/original.png"
+      "https://2.pixiecdn.com/sprites/148330/original.png"
+      "https://1.pixiecdn.com/sprites/148333/original.png"
+      "https://1.pixiecdn.com/sprites/148329/original.png"
+      "https://1.pixiecdn.com/sprites/137441/original.png"
+      "https://0.pixiecdn.com/sprites/137380/original.png"
+    ].map (url) -> imageURL: url
 
     displayModalLoader: (message) ->
       progressView = UI.Progress
@@ -179,11 +190,14 @@ module.exports = (firebase) ->
       firebase.auth().signInWithPopup(provider)
 
     createRoom: ->
-      Modal.prompt("Room name", "cool guys")
+      Modal.prompt("Room name", "a fun room")
       .then (name) ->
         if name
           db.ref("rooms").push
             name: name
+
+    addProp: (prop) ->
+      console.log prop
 
     setBackgroundURL: (backgroundURL) ->
       room = self.currentRoom()
@@ -210,8 +224,6 @@ module.exports = (firebase) ->
 
       user.roomId room.key()
       user.sync()
-      
-      console.log "croom", self.currentRoom()?.I
 
       return
 

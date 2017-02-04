@@ -7,7 +7,7 @@ module.exports = Member = (I={}, self=Model(I)) ->
     y: 270
 
   self.attrReader "key"
-  self.attrObservable "avatarURL", "x", "y", "text", "key", "roomId"
+  self.attrObservable "avatarURL", "x", "y", "text", "roomId"
 
   img = new Image
   wordElement = document.createElement "words"

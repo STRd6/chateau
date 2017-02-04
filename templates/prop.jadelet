@@ -1,0 +1,2 @@
+prop(@click)
+  img(src=@imageURL)
