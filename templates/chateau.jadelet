@@ -18,9 +18,9 @@ chateau
     = RoomList this
 
     log-control
+      - stats.increment "render.log-control"
       tab(click=@toggleOpen) Log
-      logs
-        = @logs
+      = @logs
 
     = PropControl(this)
 

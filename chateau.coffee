@@ -191,8 +191,10 @@ module.exports = (I={}, self=Model(I)) ->
 
         self.currentRoom()?.addRoomEvent
           source: self.currentAccountId()
-          type: "speak"
-          content: words
+          type: "chat"
+          content:
+            sender: self.displayName()
+            message: words
 
         self.currentUser().update
           text: words

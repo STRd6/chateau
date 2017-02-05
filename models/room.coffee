@@ -1,3 +1,4 @@
+{Bindable} = require "ui"
 Model = require "model"
 
 Drawable = require "./drawable"
@@ -14,7 +15,7 @@ module.exports = Room = (I={}, self=Model(I)) ->
     props: []
 
   self.attrReader "key"
-  self.include Drawable
+  self.include Bindable, Drawable
 
   self.attrObservable "name"
   self.attrModels "members", Member
@@ -143,7 +144,10 @@ module.exports = Room = (I={}, self=Model(I)) ->
   propsRef.on "child_removed", unsubscribeFromProp
 
   eventsRef.on "child_added", (snap) ->
-    RoomEvent.createFromSnap(snap)
+    roomEvent = RoomEvent.createFromSnap(snap)
+    self.events.push roomEvent
+
+    self.trigger "eventAdded", roomEvent
 
   return self
 

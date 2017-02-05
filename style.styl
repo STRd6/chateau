@@ -231,7 +231,15 @@ account-control, sound-control, friends-control
 
 log-control
   display: block
-  padding: 1em
+
+  > logs
+    display: block
+    height: 100%
+    overflow: auto
+    padding: 1em
+
+    > log
+      display: block
 
 form#login
   display: block
