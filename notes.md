@@ -80,3 +80,9 @@ Data
 
 Later... scripts, complex objects, animations. Props can reference animations
 and scripts to gain advanced behaviors.
+
+FAQ
+---
+
+`ref.on` is not working... make sure you've set ".read" permission in the
+security rules ya dummy!
