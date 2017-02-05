@@ -3,12 +3,14 @@ Model = require "model"
 Drawable = require "./drawable"
 Member = require "./member"
 Prop = require "./prop"
+RoomEvent = require "./room-event"
 
 module.exports = Room = (I={}, self=Model(I)) ->
   stats.increment "room.initialize"
 
   defaults I,
     members: []
+    events: []
     props: []
 
   self.attrReader "key"
@@ -17,9 +19,16 @@ module.exports = Room = (I={}, self=Model(I)) ->
   self.attrObservable "name"
   self.attrModels "members", Member
   self.attrModels "props", Prop
+  self.attrModels "events",  RoomEvent
 
   table = db.ref("rooms")
   ref = table.child(self.key())
+
+  dataRef = db.ref("room-data/#{self.key()}")
+
+  eventsRef = dataRef.child("events")
+  membershipsRef = dataRef.child("memberships")
+  propsRef = dataRef.child("props")
 
   subscribeToProp = (snap) ->
     stats.increment "room.subscribe-prop"
@@ -88,6 +97,9 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
       return self
 
+    addRoomEvent: (data) ->
+      eventsRef.push data
+
     memberByKey: (key) ->
       [member] = self.members.filter (member) ->
         member.key() is key
@@ -123,16 +135,15 @@ module.exports = Room = (I={}, self=Model(I)) ->
   # Keep room data up to date
   ref.on "value", update
 
-  # Listen for all members and props
-  dataRef = db.ref("room-data/#{self.key()}")
-
-  membershipsRef = dataRef.child("memberships")
+  # Listen for all members, props, events
   membershipsRef.on "child_added", subscribeToMember
   membershipsRef.on "child_removed", unsubscribeFromMember
 
-  propsRef = dataRef.child("props")
   propsRef.on "child_added", subscribeToProp
   propsRef.on "child_removed", unsubscribeFromProp
+
+  eventsRef.on "child_added", (snap) ->
+    RoomEvent.createFromSnap(snap)
 
   return self
 

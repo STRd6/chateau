@@ -56,6 +56,9 @@ module.exports = (I={}, self=Model(I)) ->
       Modal.show progressView.element,
         cancellable: false
 
+    currentAccountId: ->
+      self.firebaseUser()?.uid
+
     accountConnected: (firebaseUser) ->
       unless firebaseUser
         stats.increment "accountDisconnected"
@@ -164,6 +167,11 @@ module.exports = (I={}, self=Model(I)) ->
       words = input.value
       if words
         input.value = ""
+
+        self.currentRoom()?.addRoomEvent
+          source: self.currentAccountId()
+          type: "speak"
+          content: words
 
         self.currentUser().update
           text: words
