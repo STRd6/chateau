@@ -144,7 +144,7 @@ module.exports = (I={}, self=Model(I)) ->
       return unless accountId
 
       stats.increment "rooms.join"
-      
+
       previousRoom = self.currentRoom()
 
       previousRoom?.leave(accountId)
@@ -182,12 +182,12 @@ module.exports = (I={}, self=Model(I)) ->
     db.ref("rooms").on "child_added", (room) ->
       key = room.key
       value = room.val()
-  
+
       delete value.props
-  
+
       stats.increment "rooms.child_added"
       room = Room.find(key).update value
-  
+
       self.rooms.push room
 
   self.firebaseUser.observe self.accountConnected
