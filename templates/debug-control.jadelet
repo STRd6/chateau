@@ -1,0 +1,3 @@
+debug-control
+  tab(click=@toggleOpen) Debug
+  = @statsElement

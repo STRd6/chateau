@@ -24,7 +24,7 @@ Data
     room-data/$key/props[] : complete props data
     room-data/$key/events[] : complete events log
       source : account_id
-      type : [speak, emote]
+      type : [chat, emote]
       content : type dependent
 
 Later... scripts, complex objects, animations. Props can reference animations

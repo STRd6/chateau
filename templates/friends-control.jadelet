@@ -1,0 +1,3 @@
+friends-control
+  tab(click=@toggleOpen) Friends
+  h2 Coming Soon

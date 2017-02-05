@@ -21,6 +21,17 @@ PropPresenter = (prop, self) ->
       e.preventDefault()
       self.addProp prop
 
+LogPresenter = (event) ->
+  switch event.type()
+    when "chat"
+      log = document.createElement "log"
+
+      {sender, message} = event.content()
+
+      log.textContent = "#{sender}: #{message}"
+
+      return log
+
 module.exports = (self) ->
   element = ChateauTemplate Object.assign {}, self,
     toggleOpen: (e) ->
@@ -38,5 +49,9 @@ module.exports = (self) ->
     rooms: ->
       self.rooms.map (room) ->
         RoomPresenter room, self
+
+    logs: ->
+      self.currentRoom()?.events.map (event) ->
+        LogPresenter event
 
   return element

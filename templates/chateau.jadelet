@@ -1,4 +1,5 @@
 - AvatarControl = require "./avatar-control"
+- FriendsControl = require "./friends-control"
 - PropControl = require "./prop-control"
 - RoomList = require "./room-list"
 
@@ -16,12 +17,28 @@ chateau
   tab-drawer
     = RoomList this
 
+    log-control
+      tab(click=@toggleOpen) Log
+      logs
+        = @logs
+
     = PropControl(this)
 
     sound-control
       tab(click=@toggleOpen) Sounds
+      h2 Coming Soon!
 
     = AvatarControl(this)
+    
+    = FriendsControl(this)
 
     account-control
       tab(click=@toggleOpen) Account
+      h2 Info
+      label
+        h1 Display Name
+        input(value=@displayNameInput)
+
+      label
+        h1 Account Id
+        span= @currentAccountId

@@ -21,6 +21,7 @@ Prop = Member
 module.exports = (I={}, self=Model(I)) ->
 
   self.extend
+    displayNameInput: Observable "duder"
     currentRoom: Observable null
     currentUser: Observable null
     avatars: Observable [
