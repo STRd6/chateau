@@ -92,6 +92,8 @@ module.exports = (I={}, self=Model(I)) ->
       user.connect().then ->
         self.resetDisplayNameInput()
 
+        self.currentUser().updatePresence("")
+
         Modal.hide()
 
         # Display Avatar Drawer unless user has avatar
@@ -196,9 +198,12 @@ module.exports = (I={}, self=Model(I)) ->
             sender: self.displayName()
             message: words
 
+        self.currentUser().ref().child("text").onDisconnect().remove()
         self.currentUser().update
           text: words
         .sync(db)
+      else
+        self.currentUser().ref().child("text").remove()
 
     words: ->
       self.currentRoom()?.members.map (member) ->

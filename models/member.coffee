@@ -54,6 +54,19 @@ module.exports = Member = (I={}, self=Model(I)) ->
     wordElement: ->
       wordElement
 
+    ref: ->
+      ref
+
+    updatePresence: (status) ->
+      presenceRef = db.ref("presence/#{self.key()}")
+
+      presenceRef.child("online").onDisconnect().set false
+      presenceRef.child("lastSeen").onDisconnect().set db.TIMESTAMP
+      presenceRef.update
+        online: true
+        lastSeen: db.TIMESTAMP
+        status: status
+
     sync: ->
       stats.increment "member.sync"
 
@@ -67,8 +80,11 @@ module.exports = Member = (I={}, self=Model(I)) ->
         roomId: self.roomId()
 
   updateTextPosition = ->
-    wordElement.style.left = "#{self.x()}px"
-    wordElement.style.top = "#{self.y() - self.height()/2 - 30}px"
+    if self.text()
+      wordElement.style.left = "#{self.x()}px"
+      wordElement.style.top = "#{self.y() - self.height()/2 - 30}px"
+    else
+      wordElement.style.left = "-100px"
 
   self.text.observe (text) ->
     wordElement.textContent = text

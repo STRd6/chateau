@@ -20,6 +20,7 @@ if PACKAGE.name is "ROOT"
   global.stats = require("./lib/stats")()
   global.firebase = firebase
   global.db = firebase.database()
+  db.TIMESTAMP = firebase.database.ServerValue.TIMESTAMP
   global.defaults = require("./util").defaults
   global.chateau = Chateau()
 
