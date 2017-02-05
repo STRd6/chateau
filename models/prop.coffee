@@ -1,41 +1,27 @@
 Model = require "model"
 
+Drawable = require "./drawable"
+
 module.exports = Prop = (I={}, self=Model(I)) ->
   defaults I,
     x: 480
     y: 270
 
-  self.attrReader "key", "roomId"
-  self.attrObservable "imageURL", "x", "y"
+  self.include Drawable
 
-  img = new Image
+  self.attrReader "key", "roomId"
+  self.attrObservable "x", "y"
 
   update = (snap) ->
-    stats.increment "prop.update"
-
     self.update snap.val()
 
   table = db.ref("rooms/#{self.roomId()}/props")
   ref = table.child(self.key())
 
-  connected = false
-
   self.extend
-    img: ->
-      img
-
     connect: ->
-      return self if connected
-      connected = true
-
-      ref.on "value", update
-
-      return self
 
     disconnect: ->
-      return self unless connected
-      connected = false
-
       ref.off "value", update
 
       return self
@@ -46,7 +32,7 @@ module.exports = Prop = (I={}, self=Model(I)) ->
 
     update: (data) ->
       return unless data
-      stats.increment "prop.update"
+      stats.increment "props.update"
 
       Object.keys(data).forEach (key) ->
         self[key]? data[key]
@@ -58,12 +44,7 @@ module.exports = Prop = (I={}, self=Model(I)) ->
         x: self.x()
         y: self.y()
 
-    height: ->
-      img.height | 0
-
-  self.imageURL.observe (url) ->
-    if url
-      img.src = url
+  ref.on "value", update
 
   return self
 

@@ -1,4 +1,6 @@
+Drawable = require "./drawable"
 Model = require "model"
+OpenPromise = require "../lib/open-promise"
 
 module.exports = Member = (I={}, self=Model(I)) ->
   defaults I,
@@ -6,44 +8,31 @@ module.exports = Member = (I={}, self=Model(I)) ->
     x: 480
     y: 270
 
+  self.include Drawable
+
   self.attrReader "key"
-  self.attrObservable "avatarURL", "x", "y", "text", "roomId"
+  self.attrObservable "x", "y", "text", "roomId"
 
-  img = new Image
   wordElement = document.createElement "words"
-
-  update = (memberData) ->
-    stats.increment "member.update"
-
-    self.update memberData.val()
 
   table = db.ref("members")
   ref = table.child(self.key())
 
-  connected = false
-  connectingPromise = null
+  connectedPromise = OpenPromise()
+
+  update = (memberData) ->
+    connectedPromise.resolve()
+    self.update memberData.val()
+
+  ref.on "value", update
 
   self.extend
-    img: ->
-      img
-
     connect: ->
-      return connectingPromise if connected
-      connected = true
-
-      return connectingPromise = new Promise (resolve, reject) ->
-        ref.once "value", (snap) ->
-          ref.on "value", update
-
-          stats.increment "member.connect"
-          console.log snap.val()
-          update snap
-          resolve self
-        , reject
+      connectedPromise
 
     disconnect: ->
-      return self unless connected
-      connected = false
+      return self
+      # TODO: count subscribers, off when zero
 
       ref.off "value", update
 
@@ -66,25 +55,17 @@ module.exports = Member = (I={}, self=Model(I)) ->
       wordElement
 
     sync: ->
+      # TODO: Only update changed
       ref.update
-        avatarURL: self.avatarURL()
+        imageURL: self.imageURL()
         x: self.x()
         y: self.y()
         text: self.text()
         roomId: self.roomId()
 
-      # TODO: Return promise for status?
-
-    height: ->
-      img.height | 0
-
   updateTextPosition = ->
     wordElement.style.left = "#{self.x()}px"
     wordElement.style.top = "#{self.y() - self.height()/2 - 30}px"
-
-  self.avatarURL.observe (url) ->
-    if url
-      img.src = url
 
   self.text.observe (text) ->
     wordElement.textContent = text
@@ -92,6 +73,7 @@ module.exports = Member = (I={}, self=Model(I)) ->
 
   self.x.observe updateTextPosition
   self.y.observe updateTextPosition
+  self.imageURL.observe updateTextPosition
 
   return self
 
