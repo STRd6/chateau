@@ -21,8 +21,7 @@ Prop = Member
 module.exports = (I={}, self=Model(I)) ->
 
   self.extend
-    currentRoom: ->
-      Room.find self.currentUser()?.roomId()
+    currentRoom: Observable null
     currentUser: Observable null
     avatars: Observable [
       "https://1.pixiecdn.com/sprites/148517/original.png"
@@ -136,19 +135,25 @@ module.exports = (I={}, self=Model(I)) ->
         imageURL: avatarURL
       .sync()
 
-    joinRoom: (room, force) ->
-      if !force and room is self.currentRoom()
+    joinRoom: (room) ->
+      if room is self.currentRoom()
         return
 
       user = self.currentUser()
       accountId = user?.key()
       return unless accountId
 
-      self.currentRoom()?.leave(accountId)
+      stats.increment "rooms.join"
+      
+      previousRoom = self.currentRoom()
+
+      previousRoom?.leave(accountId)
       room.join(accountId)
 
       user.roomId room.key()
       user.sync()
+
+      self.currentRoom room
 
       return
 

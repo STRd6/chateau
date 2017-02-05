@@ -5,6 +5,8 @@ Member = require "./member"
 Prop = require "./prop"
 
 module.exports = Room = (I={}, self=Model(I)) ->
+  stats.increment "room.initialize"
+
   defaults I,
     members: []
     props: []
@@ -58,8 +60,6 @@ module.exports = Room = (I={}, self=Model(I)) ->
       self.members.remove member
       member.disconnect()
 
-  updateBackgroundURL = V self.imageURL
-
   self.extend
     addProp: ({imageURL}) ->
       ref.child("props").push
@@ -108,6 +108,21 @@ module.exports = Room = (I={}, self=Model(I)) ->
         imageURL: self.imageURL()
         name: self.name()
 
+  update = (snap) ->
+    data = snap.val()
+    
+    # Temporary: Remove legacy data
+    delete data.props
+    delete data.memberships
+    
+    # Rename obsolete background
+    data.imageURL = data.backgroundURL
+
+    self.update data
+
+  # Keep room data up to date
+  ref.on "value", update
+
   # Listen for all members and props
   dataRef = db.ref("room-data/#{self.key()}")
 
@@ -124,6 +139,8 @@ module.exports = Room = (I={}, self=Model(I)) ->
 identityMap = {}
 Room.find = (id) ->
   return unless id
+
+  stats.increment "room.find"
 
   identityMap[id] ?= Room
     key: id
