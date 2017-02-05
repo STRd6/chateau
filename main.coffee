@@ -1,6 +1,8 @@
 Chateau = require "./chateau"
 
 if PACKAGE.name is "ROOT"
+  require("analytics").init("UA-3464282-15")
+
   {Style} = require "ui"
   style = document.createElement "style"
   style.innerHTML = Style.all + "\n" + require("./style")
