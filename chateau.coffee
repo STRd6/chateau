@@ -22,6 +22,24 @@ module.exports = (I={}, self=Model(I)) ->
 
   self.extend
     displayNameInput: Observable "duder"
+
+    displayNameFormClass: ->
+      "changed" if self.displayNameInput() != self.displayName()
+
+    displayNameFormSubmit: (e) ->
+      e.preventDefault()
+      self.currentUser().update
+        name: self.displayNameInput()
+      .sync()
+
+    resetDisplayNameInput: (e) ->
+      e?.preventDefault()
+
+      self.displayNameInput self.displayName()
+
+    displayName: ->
+      self.currentUser()?.name() or ""
+
     currentRoom: Observable null
     currentUser: Observable null
     avatars: Observable [
@@ -72,6 +90,8 @@ module.exports = (I={}, self=Model(I)) ->
 
       self.displayModalLoader "Loading..."
       user.connect().then ->
+        self.resetDisplayNameInput()
+
         Modal.hide()
 
         # Display Avatar Drawer unless user has avatar

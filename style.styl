@@ -20,6 +20,7 @@ label
 
   > h1
     font-size: 1em
+    line-height: 20px
     margin: 0 0 4px 0
 
   > h2
@@ -27,11 +28,39 @@ label
     font-size: 1em
     margin: 0 4px 0 0
 
+  > input[type="radio"]
+    margin-right: 4px
+    vertical-align: baseline
+
 form
-  > label
-    > input[type="radio"]
+  position: relative
+
+  > micro-controls
+    display: none
+
+    > button
+      font-size: 10px
       margin-right: 4px
-      vertical-align: baseline
+
+      &:last-child
+        margin-right: 0
+
+      &.cancel
+        color: red
+        &::before
+          content: "❌"
+
+      &.accept
+        color: green
+        &::before
+          content: "✔️️"
+
+  &.changed
+    > micro-controls
+      display: block
+      position: absolute
+      top: 0
+      right: 0
 
 tab-drawer
   display: block

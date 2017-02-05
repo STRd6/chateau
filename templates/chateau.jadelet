@@ -29,15 +29,19 @@ chateau
       h2 Coming Soon!
 
     = AvatarControl(this)
-    
+
     = FriendsControl(this)
 
     account-control
       tab(click=@toggleOpen) Account
-      h2 Info
-      label
-        h1 Display Name
-        input(value=@displayNameInput)
+
+      form(submit=@displayNameFormSubmit class=@displayNameFormClass)
+        micro-controls
+          button.accept
+          button.cancel(click=@resetDisplayNameInput)
+        label
+          h1 Display Name
+          input(value=@displayNameInput)
 
       label
         h1 Account Id

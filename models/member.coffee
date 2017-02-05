@@ -11,7 +11,7 @@ module.exports = Member = (I={}, self=Model(I)) ->
   self.include Drawable
 
   self.attrReader "key"
-  self.attrObservable "x", "y", "text", "roomId"
+  self.attrObservable "x", "y", "text", "name", "roomId"
 
   wordElement = document.createElement "words"
 
@@ -55,9 +55,12 @@ module.exports = Member = (I={}, self=Model(I)) ->
       wordElement
 
     sync: ->
+      stats.increment "member.sync"
+
       # TODO: Only update changed
       ref.update
         imageURL: self.imageURL()
+        name: self.name()
         x: self.x()
         y: self.y()
         text: self.text()
