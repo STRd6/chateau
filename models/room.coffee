@@ -62,7 +62,7 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
   self.extend
     addProp: ({imageURL}) ->
-      ref.child("props").push
+      propsRef.push
         x: (Math.random() * 960)|0
         y: (Math.random() * 540)|0
         imageURL: imageURL
