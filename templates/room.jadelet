@@ -1,5 +1,5 @@
 room(@click)
-  img(src=@backgroundURL)
+  img(src=@imageURL)
   div.details
     span.name= @name
     br

@@ -19,7 +19,7 @@ if PACKAGE.name is "ROOT"
   global.firebase = firebase
   global.db = firebase.database()
   global.defaults = require("./util").defaults
-  global.chateau = Chateau(firebase)
+  global.chateau = Chateau()
 
   document.body.appendChild chateau.element
 

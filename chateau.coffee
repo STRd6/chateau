@@ -1,114 +1,29 @@
 # Chat Based MUD
 
 ChateauPresenter = require "./presenters/chateau"
+Model = require "model"
 {Modal, Observable} = UI = require "ui"
 Drop = require "./lib/drop"
 
-shaUpload = require "./sha-upload"
+Auth = require "./module/auth"
+Renderer = require "./module/renderer"
 
-sortBy = (attribute) ->
-  (a, b) ->
-    a[attribute] - b[attribute]
+shaUpload = require "./sha-upload"
 
 rand = (n) ->
   Math.floor(Math.random() * n)
-
-# Connect to room
-# Listen to ref
-# Download BG
-
 
 Member = require "./models/member"
 Room = require "./models/room"
 
 Prop = Member
 
-drawRoom = (context, room) ->
-  backgroundImage = room.img()
-  members = room.members()
-  props = room.props()
+module.exports = (I={}, self=Model(I)) ->
 
-  if backgroundImage?.width
-    context.drawImage(backgroundImage, 0, 0, context.width, context.height)
-
-  # Draw Avatars/Objects
-  Object.values(members)
-  .concat(props).sort(sortBy("z")).forEach (object) ->
-    img = object.img()
-    {width, height} = img
-    x = (object.x() - width / 2) | 0
-    y = (object.y() - height / 2) | 0
-
-    if width and height
-      context.drawImage(img, x, y)
-
-drawAvatar = (context, member) ->
-  return unless member
-
-  img = member.img()
-  {width, height} = img
-  x = ((context.width - width) / 2) | 0
-  y = ((context.height - height) / 2) | 0
-
-  if width and height
-    context.drawImage(img, x, y)
-
-initialize = (self) ->
-  # Populate Rooms list
-  db.ref("rooms").on "child_added", (room) ->
-    key = room.key
-    value = room.val()
-
-    delete value.props
-
-    stats.increment "rooms.child_added"
-    room = Room.find(key).update value
-
-    self.rooms.push room
-
-module.exports = (firebase) ->
-  db = firebase.database()
-
-  canvas = document.createElement 'canvas'
-  canvas.width = 960
-  canvas.height = 540
-
-  context = canvas.getContext('2d')
-  context.width = canvas.width
-  context.height = canvas.height
-
-  # TODO: Drag and move props
-  canvas.onclick = (e) ->
-    {pageX, pageY, currentTarget} = e
-    {top, left} = currentTarget.getBoundingClientRect()
-
-    x = pageX - left
-    y = pageY - top
-
-    self.currentUser()
-    .update
-      x: x
-      y: y
-    .sync(db)
-
-  repaint = ->
-    context.fillStyle = 'white'
-    context.fillRect(0, 0, canvas.width, canvas.height)
-
-    if room = self.currentRoom()
-      drawRoom(context, room)
-    else if user = self.currentUser()
-      drawAvatar(context, user)
-
-    return
-
-  self =
-    status: Observable "Connecting..."
-    canvas: canvas
+  self.extend
     currentRoom: ->
       Room.find self.currentUser()?.roomId()
     currentUser: Observable null
-    currentFirebaseUser: Observable null
     avatars: Observable [
       "https://1.pixiecdn.com/sprites/148517/original.png"
       "https://0.pixiecdn.com/sprites/148468/original.png"
@@ -143,7 +58,12 @@ module.exports = (firebase) ->
         cancellable: false
 
     accountConnected: (firebaseUser) ->
-      self.currentFirebaseUser firebaseUser
+      unless firebaseUser
+        stats.increment "accountDisconnected"
+        return
+
+      stats.increment "accountConnected"
+
       user = Member.find(firebaseUser.uid)
       self.currentUser user
 
@@ -249,10 +169,26 @@ module.exports = (firebase) ->
       self.currentRoom()?.members.map (member) ->
         member.wordElement()
 
-  initialize(self)
+  self.include Renderer
+  self.include Auth
+  self.initializeAuth()
+
+  do -> # General App Connectivity
+    # Populate Rooms list
+    db.ref("rooms").on "child_added", (room) ->
+      key = room.key
+      value = room.val()
+  
+      delete value.props
+  
+      stats.increment "rooms.child_added"
+      room = Room.find(key).update value
+  
+      self.rooms.push room
+
+  self.firebaseUser.observe self.accountConnected
 
   self.element = element = ChateauPresenter self
-
   Drop element, (e) ->
     files = e.dataTransfer.files
 
@@ -272,35 +208,5 @@ module.exports = (firebase) ->
 
             when "background"
               self.setBackgroundURL downloadURL
-
-  animate = ->
-    requestAnimationFrame animate
-    repaint()
-
-  animate()
-
-  db.ref(".info/connected").on "value", (snap) ->
-    if snap.val()
-      self.status "Connected"
-      stats.increment "connect"
-    else
-      self.status "Connecting..."
-
-  self.displayModalLoader("Initializing...")
-
-  # Initialize auth state
-  removeListener = firebase.auth().onAuthStateChanged (user) ->
-    logger.info "Start", user
-    if user
-      # User is signed in.
-      Modal.hide()
-      removeListener()
-
-      self.accountConnected(user)
-    else
-      # No user is signed in.
-      loginTemplate = require("./templates/login")(self)
-      Modal.show loginTemplate,
-        cancellable: false
 
   return self

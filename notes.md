@@ -63,6 +63,11 @@ Data
       x : x coordinate in room
       y : y coordinate in room
 
+    Presence presence/$account_uid
+      online :
+      lastSeen :
+      status :
+
     Rooms rooms/$room_key
       name : Room name
       imageURL
