@@ -31,6 +31,9 @@ module.exports = Member = (I={}, self=Model(I)) ->
       connectedPromise
 
     disconnect: ->
+      return self
+      # TODO: count subscribers, off when zero
+
       ref.off "value", update
 
       return self

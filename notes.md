@@ -74,9 +74,9 @@ Data
       owner : the creator of the room
       public : whether the room is public to all or private
 
-    room-data/$room_key/memberships[] : shallow list of member keys
-    room-data/$room_key/props[] : complete props data
-    room-data/$room_key/events[] : complete events log
+    room-data/$key/memberships[] : shallow list of member keys
+    room-data/$key/props[] : complete props data
+    room-data/$key/events[] : complete events log
 
 Later... scripts, complex objects, animations. Props can reference animations
 and scripts to gain advanced behaviors.

@@ -141,12 +141,11 @@ module.exports = (I={}, self=Model(I)) ->
         return
 
       user = self.currentUser()
-
       accountId = user?.key()
       return unless accountId
 
-      self.currentRoom()?.disconnect(accountId)
-      room.connect(accountId)
+      self.currentRoom()?.leave(accountId)
+      room.join(accountId)
 
       user.roomId room.key()
       user.sync()

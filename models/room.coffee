@@ -27,7 +27,6 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
     prop = Prop.find key
     prop.update(value)
-    prop.connect()
 
     unless self.propByKey(key)
       self.props.push prop
@@ -41,10 +40,8 @@ module.exports = Room = (I={}, self=Model(I)) ->
       self.props.remove prop
       prop.disconnect()
 
-  subscribeToMember = (memberData) ->
+  subscribeToMember = ({key}) ->
     stats.increment "room.subscribe-member"
-
-    {key} = memberData
 
     member = Member.find key
     member.connect()
@@ -70,42 +67,17 @@ module.exports = Room = (I={}, self=Model(I)) ->
         y: (Math.random() * 540)|0
         imageURL: imageURL
 
+    join: (accountId) ->
+      # Auto-leave on disconnect
+      membershipsRef.child(accountId).onDisconnect().remove()
+      # Join
+      membershipsRef.child(accountId).set true
+
+    leave: (accountId) ->
+      membershipsRef.child(accountId).remove()
+
     clearAllProps: ->
       ref.child("props").remove()
-
-    connect: (accountId) ->
-      stats.increment("room-connect")
-
-      key = self.key()
-
-      ref.child("memberships").on "child_added", subscribeToMember
-      ref.child("memberships").on "child_removed", unsubscribeFromMember
-
-      ref.child("props").on "child_added", subscribeToProp
-      ref.child("props").on "child_removed", unsubscribeFromProp
-
-      ref.child("backgroundURL").on "value", updateBackgroundURL
-
-      # Add member to current room
-      ref.child("memberships/#{accountId}").set true
-
-      return self
-
-    disconnect: (accountId) ->
-      stats.increment("room-disconnect")
-
-      key = self.key()
-
-      # Remove self from previous room
-      ref.child("memberships/#{accountId}").set null
-
-      ref.child("backgroundURL").off "value", updateBackgroundURL
-
-      ref.child("props").off "child_removed", unsubscribeFromProp
-      ref.child("props").off "child_added", subscribeToProp
-
-      ref.child("memberships").off "child_added", subscribeToMember
-      ref.child("memberships").off "child_removed", unsubscribeFromMember
 
     update: (data) ->
       return unless data
@@ -135,6 +107,17 @@ module.exports = Room = (I={}, self=Model(I)) ->
       ref.update
         imageURL: self.imageURL()
         name: self.name()
+
+  # Listen for all members and props
+  dataRef = db.ref("room-data/#{self.key()}")
+
+  membershipsRef = dataRef.child("memberships")
+  membershipsRef.on "child_added", subscribeToMember
+  membershipsRef.on "child_removed", unsubscribeFromMember
+
+  propsRef = dataRef.child("props")
+  propsRef.on "child_added", subscribeToProp
+  propsRef.on "child_removed", unsubscribeFromProp
 
   return self
 
