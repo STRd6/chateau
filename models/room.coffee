@@ -50,7 +50,7 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
     if prop
       self.props.remove prop
-      prop.disconnect()
+      # prop.disconnect()
 
   subscribeToMember = ({key}) ->
     stats.increment "room.subscribe-member"
@@ -68,7 +68,7 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
     if member
       self.members.remove member
-      member.disconnect()
+      # member.disconnect()
 
   self.extend
     addProp: ({imageURL}) ->

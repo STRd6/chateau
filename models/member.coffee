@@ -1,8 +1,7 @@
+Base = require "./base"
 Drawable = require "./drawable"
-Model = require "model"
-OpenPromise = require "../lib/open-promise"
 
-module.exports = Member = (I={}, self=Model(I)) ->
+module.exports = Base "members", (I={}, self=Model(I)) ->
   defaults I,
     text: ""
     x: 480
@@ -10,52 +9,17 @@ module.exports = Member = (I={}, self=Model(I)) ->
 
   self.include Drawable
 
-  self.attrReader "key"
-  self.attrObservable "x", "y", "text", "name", "roomId"
+  self.attrSync "x", "y", "text", "name", "roomId"
 
   wordElement = document.createElement "words"
 
-  table = db.ref("members")
-  ref = table.child(self.key())
-
-  connectedPromise = OpenPromise()
-
-  update = (memberData) ->
-    connectedPromise.resolve()
-    self.update memberData.val()
-
-  ref.on "value", update
-
   self.extend
-    connect: ->
-      connectedPromise
-
-    disconnect: ->
-      return self
-      # TODO: count subscribers, off when zero
-
-      ref.off "value", update
-
-      return self
-
     updatePosition: ({x, y}) ->
       self.x x
       self.y y
 
-    update: (data) ->
-      return unless data
-      stats.increment "member.update"
-
-      Object.keys(data).forEach (key) ->
-        self[key]? data[key]
-
-      return self
-
     wordElement: ->
       wordElement
-
-    ref: ->
-      ref
 
     updatePresence: (status) ->
       presenceRef = db.ref("presence/#{self.key()}")
@@ -66,18 +30,6 @@ module.exports = Member = (I={}, self=Model(I)) ->
         online: true
         lastSeen: db.TIMESTAMP
         status: status
-
-    sync: ->
-      stats.increment "member.sync"
-
-      # TODO: Only update changed
-      ref.update
-        imageURL: self.imageURL()
-        name: self.name()
-        x: self.x()
-        y: self.y()
-        text: self.text()
-        roomId: self.roomId()
 
   updateTextPosition = ->
     if self.text()
@@ -95,10 +47,3 @@ module.exports = Member = (I={}, self=Model(I)) ->
   self.imageURL.observe updateTextPosition
 
   return self
-
-identityMap = {}
-
-Member.find = (id) ->
-  # Identity map account ids
-  identityMap[id] ?= Member
-    key: id
