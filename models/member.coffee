@@ -3,6 +3,8 @@ Drawable = require "./drawable"
 
 module.exports = Base "members", (I={}, self=Model(I)) ->
   defaults I,
+    name: ""
+    roomId: null
     text: ""
     x: 480
     y: 270

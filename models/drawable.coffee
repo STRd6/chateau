@@ -2,7 +2,10 @@
 module.exports = (I, self) ->
   img = new Image
 
-  self.attrObservable "imageURL"
+  if self.attrSync
+    self.attrSync "imageURL"
+  else
+    self.attrObservable "imageURL"
 
   self.extend
     img: ->

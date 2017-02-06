@@ -44,5 +44,8 @@ chateau
           input(value=@displayNameInput)
 
       label
-        h1 Account Id
+        h1 Account ID
         span= @currentAccountId
+
+      label
+        button(click=@logout) Sign Out

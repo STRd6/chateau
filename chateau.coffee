@@ -123,6 +123,11 @@ module.exports = (I={}, self=Model(I)) ->
             element.classList.remove("show")
           self.element.querySelector("room-control").classList.add("show")
 
+    logout: (e) ->
+      e?.preventDefault()
+
+      firebase.auth().signOut()
+
     anonLogin: (e) ->
       e.preventDefault()
 
