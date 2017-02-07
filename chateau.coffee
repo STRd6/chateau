@@ -87,11 +87,21 @@ module.exports = (I={}, self=Model(I)) ->
 
       stats.increment "accountConnected"
 
+      providerDisplayName = null
+      providerPhoto = null
+
+      # Get provider data
+      firebaseUser.providerData.forEach (profile) ->
+        providerDisplayName ?= profile.displayName
+        providerPhoto ?= profile.photoURL
+
       user = Member.find(firebaseUser.uid)
       self.currentUser user
 
       self.displayModalLoader "Loading..."
       user.connect().then ->
+        unless user.name()
+          user.name providerDisplayName
         self.resetDisplayNameInput()
 
         self.currentUser().updatePresence("")
