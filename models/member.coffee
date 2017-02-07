@@ -33,6 +33,11 @@ module.exports = Base "members", (I={}, self=Model(I)) ->
         lastSeen: db.TIMESTAMP
         status: status
 
+    updateProfilePhoto: (url) ->
+      presenceRef = db.ref("presence/#{self.key()}")
+
+      presenceRef.child("profilePhotoURL").set url
+
   updateTextPosition = ->
     if self.text()
       wordElement.style.left = "#{self.x()}px"

@@ -1,8 +1,6 @@
 - FriendTemplate = require "./friend"
 
-friends-control
+friends-control.wide
   tab(click=@toggleOpen) Friends
 
-  friends
-    - [0..3].map () ->
-      = FriendTemplate()
+  = @friends

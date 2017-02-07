@@ -3,6 +3,8 @@ ChateauTemplate = require "../templates/chateau"
 PropTemplate = require "../templates/prop"
 RoomTemplate = require "../templates/room"
 
+FriendsPresenter = require "./friends"
+
 AvatarPresenter = (avatar, self) ->
   stats.increment "presenter.avatar"
 
@@ -86,5 +88,6 @@ module.exports = (self) ->
         findOrInitRoomLogs(room)
 
     friends: ->
+      FriendsPresenter(self)
 
   return element

@@ -7,6 +7,6 @@
 Base = require "./base"
 
 module.exports = Base "presence", (I={}, self=Model(I)) ->
-  self.attrSync "online", "lastSeen", "status"
+  self.attrSync "lastSeen", "online", "profilePhotoURL", "status"
 
   return self

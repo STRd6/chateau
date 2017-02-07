@@ -1,7 +1,7 @@
-friend
-  img.profile
+friend(class=@onlineStatus)
+  img.profile(src=@profilePhotoURL)
   online-status
   info
-    .name Duder
-    .status-message lul wut
-  time.last-seen Ages ago
+    .name= @name
+    .status-message= @status
+  time.last-seen= @lastSeen

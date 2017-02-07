@@ -104,7 +104,10 @@ module.exports = (I={}, self=Model(I)) ->
           user.name providerDisplayName
         self.resetDisplayNameInput()
 
-        self.currentUser().updatePresence("")
+        # TODO: Don't overwrite profile photo if the user already has one
+        user.updateProfilePhoto providerPhoto
+
+        user.updatePresence("")
 
         Modal.hide()
 

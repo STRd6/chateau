@@ -75,9 +75,18 @@ module.exports = (tableName, Mixin) ->
   identityMap = {}
   # Use an identity map to return the same instances for the same key
   # TODO: Allow for initializing with data
-  ModelConstructor.find = (id) ->
+  ModelConstructor.find = (key) ->
     # Identity map instances by key
-    identityMap[id] ?= ModelConstructor
-      key: id
+    identityMap[key] ?= ModelConstructor
+      key: key
+
+  ModelConstructor.fromSnap = (snap) ->
+    key = snap.key
+    data = snap.val()
+
+    model = ModelConstructor.find(key)
+    model.update(data)
+
+    return model
 
   return ModelConstructor

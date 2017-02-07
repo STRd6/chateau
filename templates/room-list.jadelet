@@ -1,4 +1,4 @@
-room-control
+room-control.wide
   tab(click=@toggleOpen) Rooms
 
   actions

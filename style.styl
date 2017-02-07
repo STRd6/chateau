@@ -79,6 +79,9 @@ tab-drawer
     width: 200px
     z-index: 0
 
+    &.wide
+      width: 300px
+
     > tab
       background-color: white
       border: 1px solid black
@@ -103,6 +106,9 @@ tab-drawer
   > *.show
     left: -200px
     z-index: 60
+
+    &.wide
+      left: -300px
 
     > tab
       &::before
@@ -194,14 +200,10 @@ prop-control
 
 room-control
   padding: 1em
-  width: 300px
 
   > actions
     display: block
     margin-bottom: 1em
-
-  &.show
-    left: -300px
 
   > rooms
     display: block
@@ -258,13 +260,18 @@ friends-control
         width: 32px
 
       > online-status
-        background-color: green
+        background-color: white
+        border: 1px solid gray
         border-radius: 6px
         height: 12px
         left: 20px
         position: absolute
         top: 20px
         width: 12px
+
+      &.online > online-status
+        background-color: green
+        border: none
 
       > info
         flex: 1 1 auto

@@ -13,6 +13,7 @@ Data
       online :
       lastSeen :
       status :
+      profilePhotoURL :
 
     Rooms rooms/$room_key
       name : Room name
