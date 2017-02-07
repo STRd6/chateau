@@ -38,7 +38,7 @@ module.exports = Base "members", (I={}, self=Model(I)) ->
       wordElement.style.left = "#{self.x()}px"
       wordElement.style.top = "#{self.y() - self.height()/2 - 30}px"
     else
-      wordElement.style.left = "-100px"
+      wordElement.style.left = "-100%"
 
   self.text.observe (text) ->
     wordElement.textContent = text

@@ -222,7 +222,7 @@ room-control
         margin: auto
         padding-left: 1em
 
-sound-control, friends-control
+sound-control
   display: block
   padding: 1em
 
@@ -233,6 +233,49 @@ account-control
   display: block
   padding: 1em
   padding-top: 0
+
+friends-control
+  display: block
+
+  > friends
+    display: block
+    height: 100%
+    overflow: auto
+    padding: 1em
+
+    > friend
+      border-bottom: 1px solid gray
+      display: flex
+      margin-bottom: 0.5em
+      position: relative
+
+      > img.profile
+        border: 2px solid gray
+        border-radius: 16px
+        flex: 0 0 auto
+        height: 32px
+        margin: 0 0.5em 0.5em 0
+        width: 32px
+
+      > online-status
+        background-color: green
+        border-radius: 6px
+        height: 12px
+        left: 20px
+        position: absolute
+        top: 20px
+        width: 12px
+
+      > info
+        flex: 1 1 auto
+        > .status-message
+          color: gray
+
+      > time.last-seen
+        color: gray
+        position: absolute
+        right: 0
+        top: 0
 
 log-control
   display: block

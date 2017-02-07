@@ -20,6 +20,8 @@ Prop = Member
 
 module.exports = (I={}, self=Model(I)) ->
 
+  self.include require "./module/auth"
+
   self.extend
     displayNameInput: Observable "duder"
 
@@ -122,24 +124,6 @@ module.exports = (I={}, self=Model(I)) ->
           self.element.querySelectorAll("tab-drawer > *").forEach (element) ->
             element.classList.remove("show")
           self.element.querySelector("room-control").classList.add("show")
-
-    logout: (e) ->
-      e?.preventDefault()
-
-      firebase.auth().signOut()
-
-    anonLogin: (e) ->
-      e.preventDefault()
-
-      firebase.auth().signInAnonymously()
-
-    googleLogin: (e) ->
-      e.preventDefault()
-
-      provider = new firebase.auth.GoogleAuthProvider()
-      provider.addScope('profile')
-      provider.addScope('email')
-      firebase.auth().signInWithPopup(provider)
 
     createRoom: ->
       Modal.prompt("Room name", "a fun room")

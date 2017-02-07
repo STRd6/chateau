@@ -1,3 +1,8 @@
+- FriendTemplate = require "./friend"
+
 friends-control
   tab(click=@toggleOpen) Friends
-  h2 Coming Soon
+
+  friends
+    - [0..3].map () ->
+      = FriendTemplate()

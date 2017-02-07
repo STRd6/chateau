@@ -3,5 +3,6 @@ form#login
 
   h2 Log in with
 
-  button(click=@anonLogin) Anon
+  button(click=@facebookLogin) Facebook
+  button(click=@githubLogin) GitHub
   button(click=@googleLogin) Google

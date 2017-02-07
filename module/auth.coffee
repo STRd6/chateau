@@ -49,3 +49,40 @@ module.exports = (I, self) ->
     connectionStatus: Observable "Disconnected" # [Connected, Disconnected]
     firebaseUser: Observable null # The current firebase user
     initializeAuth: initializeAuth
+
+    logout: (e) ->
+      e?.preventDefault()
+
+      firebase.auth().signOut()
+
+    anonLogin: (e) ->
+      e.preventDefault()
+
+      firebase.auth().signInAnonymously()
+
+    googleLogin: (e) ->
+      e.preventDefault()
+
+      provider = new firebase.auth.GoogleAuthProvider()
+      provider.addScope('profile')
+      provider.addScope('email')
+      firebase.auth().signInWithPopup(provider)
+
+    facebookLogin: (e) ->
+      e.preventDefault()
+
+      provider = new firebase.auth.FacebookAuthProvider()
+      firebase.auth().signInWithPopup(provider)
+
+    twitterLogin: (e) ->
+      e.preventDefault()
+
+      provider = new firebase.auth.TwitterAuthProvider()
+      firebase.auth().signInWithPopup(provider)
+
+    githubLogin: (e) ->
+      e.preventDefault()
+
+      provider = new firebase.auth.GithubAuthProvider()
+      provider.addScope('user:email')
+      firebase.auth().signInWithPopup(provider)

@@ -85,4 +85,6 @@ module.exports = (self) ->
       if room
         findOrInitRoomLogs(room)
 
+    friends: ->
+
   return element
