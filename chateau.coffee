@@ -240,7 +240,7 @@ module.exports = (I={}, self=Model(I)) ->
 
       stats.increment "drop-file"
 
-      shaUpload(firebase, file)
+      shaUpload(self.currentUser().dataFolder(), file)
       .then (downloadURL) ->
         Modal.form require("./templates/asset-form")()
         .then (result) ->

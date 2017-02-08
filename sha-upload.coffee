@@ -4,7 +4,7 @@ require "./extensions"
 {Modal, Progress} = UI
 
 # Upload to firebase storage based on SHA256 of file
-module.exports = (firebase, file) ->
+module.exports = (folder, file) ->
   file.readAsArrayBuffer()
   .then (buffer) ->
     crypto.subtle.digest("SHA-256", buffer)
@@ -14,7 +14,7 @@ module.exports = (firebase, file) ->
 
     new Promise (resolve, reject) ->
       # Upload to CDN
-      ref = firebase.storage().ref(sha)
+      ref = folder.child(sha)
       uploadTask = ref.put file
 
       progressView = Progress

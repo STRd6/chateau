@@ -16,6 +16,9 @@ module.exports = Base "members", (I={}, self=Model(I)) ->
   wordElement = document.createElement "words"
 
   self.extend
+    dataFolder: ->
+      firebase.storage().ref("users/#{self.key()}/data")
+
     updatePosition: ({x, y}) ->
       self.x x
       self.y y
