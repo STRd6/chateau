@@ -53,6 +53,9 @@ module.exports = (I, self) ->
     logout: (e) ->
       e?.preventDefault()
 
+      # TODO: Need to update presence when logging out, disconnect stuff doesn't
+      # trigger when we just sign out
+
       firebase.auth().signOut()
 
     anonLogin: (e) ->

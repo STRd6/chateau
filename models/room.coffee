@@ -124,13 +124,6 @@ module.exports = Room = (I={}, self=Model(I)) ->
   update = (snap) ->
     data = snap.val()
 
-    # Temporary: Remove legacy data
-    delete data.props
-    delete data.memberships
-
-    # Rename obsolete background
-    data.imageURL = data.backgroundURL
-
     self.update data
 
   # Keep room data up to date
