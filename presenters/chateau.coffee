@@ -42,11 +42,21 @@ LogPresenter = (event) ->
 
       return log
 
+audioBlip = new Audio
+audioBlip.src = "https://firebasestorage.googleapis.com/v0/b/chateau-f2799.appspot.com/o/users%2F6T9b9MMW1qMCToWpfvl3Uutzi4p2%2Fdata%2F50494d2f9edb8ae2a9cdaf51d6b348e93f15da40b3326ae35832fecb6173f7ea?alt=media&token=c2e9fedd-20cc-4fc7-9d39-77d24e7c64f9"
+
 module.exports = (self) ->
   previousRoom = null
   logsElement = document.createElement 'logs'
 
+  playSound = true
+
   addLog = (event) ->
+    if playSound
+      audioBlip.pause()
+      audioBlip.currentTime = 0
+      audioBlip.play()
+
     logsElement.appendChild LogPresenter event
 
   element = ChateauTemplate Object.assign {}, self,
@@ -84,7 +94,9 @@ module.exports = (self) ->
 
     logsElement.empty()
 
+    playSound = false
     room.events.forEach addLog
+    playSound = true
     room.on "eventAdded", addLog
 
   return element
