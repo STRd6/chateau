@@ -43,27 +43,12 @@ LogPresenter = (event) ->
       return log
 
 module.exports = (self) ->
-  roomsLogElements = {}
+  previousRoom = null
+  logsElement = document.createElement 'logs'
 
-  findOrInitRoomLogs = (room) ->
-    key = room.key()
+  addLog = (event) ->
+    logsElement.appendChild LogPresenter event
 
-    return roomsLogElements[key] if roomsLogElements[key]
-
-    logsElement = document.createElement 'logs'
-
-    # Use this trick to escape auto-binding room events observable
-    setTimeout ->
-      room.events.forEach (event) ->
-        logsElement.appendChild LogPresenter event
-      room.on "eventAdded", (event) ->
-        logsElement.appendChild LogPresenter event
-    , 0
-
-    roomsLogElements[key] = logsElement
-
-    return logsElement
-  
   element = ChateauTemplate Object.assign {}, self,
     toggleOpen: (e) ->
       # TODO: Close any other open tabs
@@ -81,13 +66,25 @@ module.exports = (self) ->
       self.rooms.map (room) ->
         RoomPresenter room, self
 
-    logs: ->
-      room = self.currentRoom()
-
-      if room
-        findOrInitRoomLogs(room)
+    logsElement: logsElement
 
     friends: ->
       FriendsPresenter(self)
+
+  # Update logs when switching rooms
+  self.currentRoom.observe (room) ->
+    return unless room
+
+    key = room.key()
+
+    stats.increment "present.room-change"
+
+    previousRoom?.off "eventAdded", addLog
+    previousRoom = room
+
+    logsElement.empty()
+
+    room.events.forEach addLog
+    room.on "eventAdded", addLog
 
   return element

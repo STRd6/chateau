@@ -15,12 +15,13 @@ chateau
       button Speak
 
   tab-drawer
+    - stats.increment "render.tab-drawer"
     = RoomList this
 
     log-control
       - stats.increment "render.log-control"
       tab(click=@toggleOpen) Log
-      = @logs
+      = @logsElement
 
     = PropControl(this)
 

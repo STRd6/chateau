@@ -21,7 +21,7 @@ module.exports = (self) ->
   # Listen to all presence changes
   # TODO: Scope to only friends list
   db.ref('presence').on "child_added", (snap) ->
-    console.log snap
+    console.log snap.val()
     presence = Presence.fromSnap(snap)
     element.appendChild FriendPresenter presence
 

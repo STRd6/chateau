@@ -23,3 +23,7 @@ Promise::finally ?= (callback) ->
       Promise.resolve(callback())
       .then -> throw reason
   )
+
+HTMLElement::empty ?= ->
+  while @lastChild
+    @removeChild @lastChild
