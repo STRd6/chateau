@@ -6,4 +6,5 @@ remoteDependencies: [
 dependencies:
   analytics: "distri/google-analytics:v0.1.0"
   model: "distri/model:master"
+  postmaster: "distri/postmaster:master"
   ui: "STRd6/ui:master"

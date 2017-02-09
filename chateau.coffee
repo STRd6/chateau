@@ -2,10 +2,11 @@
 
 ChateauPresenter = require "./presenters/chateau"
 Model = require "model"
-{Modal, Observable} = UI = require "ui"
+{Bindable, Modal, Observable} = UI = require "ui"
 Drop = require "./lib/drop"
 
 Auth = require "./module/auth"
+RemoteInterface = require "./module/remote-interface"
 Renderer = require "./module/renderer"
 
 shaUpload = require "./sha-upload"
@@ -19,8 +20,7 @@ Room = require "./models/room"
 Prop = Member
 
 module.exports = (I={}, self=Model(I)) ->
-
-  self.include require "./module/auth"
+  self.include Auth, Bindable, RemoteInterface
 
   self.extend
     displayNameInput: Observable "duder"
@@ -163,6 +163,27 @@ module.exports = (I={}, self=Model(I)) ->
         imageURL: avatarURL
       .sync()
 
+    loadFile: (file) ->
+      stats.increment "load-file"
+
+      # TODO: handle simultaneous uploads
+      shaUpload(self.currentUser().dataFolder(), file)
+      .then (downloadURL) ->
+        self.trigger "event", "file-upload"
+
+        Modal.form require("./templates/asset-form")()
+        .then (result) ->
+          switch result?.selection
+            when "avatar"
+              self.setAvatar downloadURL
+
+              self.trigger "event", "custom-avatar"
+
+            when "background"
+              self.setBackgroundURL downloadURL
+
+              self.trigger "event", "custom-background"
+
     joinRoom: (room) ->
       if room is self.currentRoom()
         return
@@ -236,19 +257,15 @@ module.exports = (I={}, self=Model(I)) ->
 
     if files.length
       # TODO: Process multiple files
+      # TODO: Process files based on type
+      # TODO: Process images based on size
       file = files[0]
 
-      stats.increment "drop-file"
+      self.loadFile(file)
 
-      shaUpload(self.currentUser().dataFolder(), file)
-      .then (downloadURL) ->
-        Modal.form require("./templates/asset-form")()
-        .then (result) ->
-          switch result?.selection
-            when "avatar"
-              self.setAvatar downloadURL
+  self.on "event", (name) ->
+    stats.increment "event.#{name}"
 
-            when "background"
-              self.setBackgroundURL downloadURL
+    self.invokeRemote("event", arguments...)
 
   return self

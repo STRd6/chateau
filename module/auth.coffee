@@ -18,24 +18,23 @@ module.exports = (I, self) ->
 
       if connected
         self.connectionStatus "Connected"
-        stats.increment "connect"
-        # TODO: Remove room membership onDisconnect
-        # TODO: Update presence
-
+        stats.increment "status.connected"
       else
         self.connectionStatus "Disconnected"
-        stats.increment "disconnected"
+        stats.increment "status.disconnected"
 
   # Initialize auth state
   initializeAuth = ->
     self.displayModalLoader("Initializing...")
 
     firebase.auth().onAuthStateChanged (user) ->
-      stats.increment "authStateChanged"
+      stats.increment "auth.state-changed"
 
       if user
         # User is signed in.
         Modal.hide()
+
+        self.trigger "event", "login"
 
         self.firebaseUser(user)
       else
@@ -52,6 +51,8 @@ module.exports = (I, self) ->
 
     logout: (e) ->
       e?.preventDefault()
+
+      self.trigger "event", "logout"
 
       # TODO: Need to update presence when logging out, disconnect stuff doesn't
       # trigger when we just sign out
