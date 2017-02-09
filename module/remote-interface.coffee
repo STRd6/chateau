@@ -14,7 +14,10 @@ module.exports = (I, self) ->
           self[name](arguments...)
 
     # Invoke a method in the remote handler
+    # do nothing if no remote target
     invokeRemote: ->
+      return unless self.remoteTarget()
+
       postmaster.invokeRemote(arguments...)
       .catch (e) ->
         if e.message.match /No ack/
