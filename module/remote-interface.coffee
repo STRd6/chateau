@@ -1,6 +1,6 @@
 Postmaster = require "postmaster"
 
-# Mixin to 
+# Mixin to attach postmaster and whitelist methods to expose to the remote interface
 module.exports = (I, self) ->
   postmaster = Postmaster()
 
