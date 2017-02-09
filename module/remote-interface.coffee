@@ -16,6 +16,7 @@ module.exports = (I, self) ->
     # Invoke a method in the remote handler
     # do nothing if no remote target
     invokeRemote: ->
+      stats.increment "remote-interface.no-target"
       return unless self.remoteTarget()
 
       postmaster.invokeRemote(arguments...)
