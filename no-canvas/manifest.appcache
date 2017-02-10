@@ -1,0 +1,12 @@
+CACHE MANIFEST
+# 1486690932797
+
+CACHE:
+index.html
+../no-canvas.json
+https://www.gstatic.com/firebasejs/3.6.7/firebase.js
+
+NETWORK:
+https://*
+http://*
+*
