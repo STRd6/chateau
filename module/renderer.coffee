@@ -1,3 +1,5 @@
+BackgroundImageTemplate = require "../templates/background-image"
+
 SceneObjectTemplate = require "../templates/scene-object"
 SceneObjectPresenter = (object) ->
   SceneObjectTemplate Object.assign {}, object,
@@ -62,7 +64,8 @@ module.exports = (I, self) ->
 
     if room
       # Add bg
-      
+      scene.appendChild BackgroundImageTemplate room
+
       # Add avatars
       room.members.forEach objectAdded
       # Add props
