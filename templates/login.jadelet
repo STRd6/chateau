@@ -1,5 +1,9 @@
 form#login
-  h1 Connect to Chateau
+  h1 Welcome to Chateau
+
+  img.splash(src="https://firebasestorage.googleapis.com/v0/b/chateau-f2799.appspot.com/o/users%2F6T9b9MMW1qMCToWpfvl3Uutzi4p2%2Fdata%2Ffa942c8319a628d662cb2f61a0b60049509b2e88a1161b73e3f620e6971b1935?alt=media&token=2d079018-f917-4448-82b2-8798ca754993")
+
+  p Chateau is a fun and friendly virtual world where you can hang out and chat with your friends.
 
   h2 Log in with
 
