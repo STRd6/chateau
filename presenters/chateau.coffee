@@ -57,7 +57,12 @@ module.exports = (self) ->
       audioBlip.currentTime = 0
       audioBlip.play()
 
+    shouldScrollToBottom = (logsElement.scrollHeight - logsElement.scrollTop) <= logsElement.getBoundingClientRect().height
+
     logsElement.appendChild LogPresenter event
+
+    if shouldScrollToBottom
+      logsElement.scrollTop = logsElement.scrollHeight
 
   element = ChateauTemplate Object.assign {}, self,
     toggleOpen: (e) ->
