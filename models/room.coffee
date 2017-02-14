@@ -43,6 +43,8 @@ module.exports = Room = (I={}, self=Model(I)) ->
     unless self.propByKey(key)
       self.props.push prop
 
+      self.trigger "propAdded", prop
+
   unsubscribeFromProp = ({key}) ->
     stats.increment "room.unsubscribe-prop"
 
@@ -50,6 +52,8 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
     if prop
       self.props.remove prop
+
+      self.trigger "propRemoved", prop
       # prop.disconnect()
 
   subscribeToMember = ({key}) ->
@@ -60,6 +64,8 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
     unless self.memberByKey(key)
       self.members.push member
+      
+      self.trigger "memberAdded", member
 
   unsubscribeFromMember = ({key}) ->
     stats.increment "room.unsubscribe-member"
@@ -70,8 +76,14 @@ module.exports = Room = (I={}, self=Model(I)) ->
       self.members.remove member
       # member.disconnect()
 
+      self.trigger "memberRemoved", member
+
   self.extend
     addProp: ({imageURL}) ->
+      if self.props().length >= 50
+        stats.increment "room.props-full"
+        return
+
       propsRef.push
         x: (Math.random() * 960)|0
         y: (Math.random() * 540)|0

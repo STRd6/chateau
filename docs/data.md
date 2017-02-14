@@ -23,6 +23,9 @@ Data
 
     room-data/$key/memberships[] : shallow list of member keys
     room-data/$key/props[] : complete props data
+      imageURL
+      x : x position
+      y : y position
     room-data/$key/events[] : complete events log
       source : account_id
       type : [chat, emote]

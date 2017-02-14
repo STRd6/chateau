@@ -21,7 +21,7 @@ module.exports = (tableName, Mixin) ->
         self.attrObservable names...
 
         syncAttributes = syncAttributes.concat names
-      
+
       # TODO: Currently only using this to track when the current user
       # has refreshed from firebase
       connect: ->
