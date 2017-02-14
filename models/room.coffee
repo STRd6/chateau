@@ -3,7 +3,7 @@ Model = require "model"
 
 Drawable = require "./drawable"
 Member = require "./member"
-Prop = require "./prop"
+PropBase = require "./prop"
 RoomEvent = require "./room-event"
 
 module.exports = Room = (I={}, self=Model(I)) ->
@@ -30,6 +30,8 @@ module.exports = Room = (I={}, self=Model(I)) ->
   eventsRef = dataRef.child("events")
   membershipsRef = dataRef.child("memberships")
   propsRef = dataRef.child("props")
+
+  Prop = PropBase("room-data/#{self.key()}/props")
 
   subscribeToProp = (snap) ->
     stats.increment "room.subscribe-prop"
@@ -64,7 +66,7 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
     unless self.memberByKey(key)
       self.members.push member
-      
+
       self.trigger "memberAdded", member
 
   unsubscribeFromMember = ({key}) ->
