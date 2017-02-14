@@ -39,6 +39,7 @@ addDragHandling = (element) ->
 
     dragStart = e
     activeDrag = view
+    view.element.classList.add "dragging"
 
   element.addEventListener "mousemove", (e) ->
     if activeDrag
@@ -58,6 +59,8 @@ addDragHandling = (element) ->
   # This is document to capture all mouseups, even those that take place outside
   # of the element
   document.addEventListener "mouseup", ->
+    activeDrag?.element.classList.remove "dragging"
+
     activeDrag = null
     activeResize = null
 
