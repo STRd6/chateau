@@ -1,8 +1,13 @@
+{elementView} = require "../util"
+
 BackgroundImageTemplate = require "../templates/background-image"
 
 SceneObjectTemplate = require "../templates/scene-object"
-SceneObjectPresenter = (object) ->
-  SceneObjectTemplate Object.assign {}, object,
+SceneObjectView = (object) ->
+  self =
+    element: null
+
+  element = SceneObjectTemplate Object.assign self, object,
     style: ->
       x = object.x()|0
       y = object.y()|0
@@ -12,25 +17,56 @@ SceneObjectPresenter = (object) ->
 
       "transform: matrix(1, 0, 0, 1, #{x}, #{y}); left: -#{hw}px; top: -#{hh}px"
 
+  element.view = self
+  self.element = element
+
+  return self
+
+addDragHandling = (element) ->
+  # Drag Handling
+  activeDrag = null
+  dragStart = null
+  element.addEventListener "mousedown", (e) ->
+    {target} = e
+
+    view = elementView target
+
+    # TODO: Ensure view is an avatar or prop
+    return unless view
+
+    e.preventDefault()
+
+    dragStart = e
+    activeDrag = view
+
+  element.addEventListener "mousemove", (e) ->
+    if activeDrag
+      {clientX:prevX, clientY:prevY} = dragStart
+      {clientX:x, clientY:y} = e
+
+      dx = x - prevX
+      dy = y - prevY
+
+      activeDrag.updatePosition
+        x: activeDrag.x() + dx
+        y: activeDrag.y() + dy
+      .sync()
+
+      dragStart = e
+
+  # This is document to capture all mouseups, even those that take place outside
+  # of the element
+  document.addEventListener "mouseup", ->
+    activeDrag = null
+    activeResize = null
+
 # A scene to contain the background, all the avatars, and props
 # We use DOM nodes because we want fancy CSS3 transforms, interactivity, and
 # more advanced widgets like youtube embeds
 module.exports = (I, self) ->
   scene = document.createElement 'scene'
 
-  # TODO: Drag and move props
-  scene.onclick = (e) ->
-    {pageX, pageY, currentTarget} = e
-    {top, left} = currentTarget.getBoundingClientRect()
-
-    x = pageX - left
-    y = pageY - top
-
-    self.currentUser()
-    .update
-      x: x
-      y: y
-    .sync(db)
+  addDragHandling(scene)
 
   previousRoom = null
 
@@ -51,10 +87,11 @@ module.exports = (I, self) ->
     room.on "propRemoved", objectRemoved
 
   objectAdded = (object) ->
-    scene.appendChild SceneObjectPresenter object
+    view = SceneObjectView object
+    scene.appendChild view.element
 
   objectRemoved = (object) ->
-    
+
 
   self.currentRoom.observe (room) ->
     # Empty previous scene

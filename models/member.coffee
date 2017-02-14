@@ -1,5 +1,6 @@
 Base = require "./base"
 Drawable = require "./drawable"
+Positionable = require "./positionable"
 
 module.exports = Base "members", (I={}, self=Model(I)) ->
   defaults I,
@@ -9,19 +10,15 @@ module.exports = Base "members", (I={}, self=Model(I)) ->
     x: 480
     y: 270
 
-  self.include Drawable
+  self.include Drawable, Positionable
 
-  self.attrSync "x", "y", "text", "name", "roomId"
+  self.attrSync "text", "name", "roomId"
 
   wordElement = document.createElement "words"
 
   self.extend
     dataFolder: ->
       firebase.storage().ref("users/#{self.key()}/data")
-
-    updatePosition: ({x, y}) ->
-      self.x x
-      self.y y
 
     wordElement: ->
       wordElement
