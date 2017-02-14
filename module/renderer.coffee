@@ -4,11 +4,11 @@ SceneObjectTemplate = require "../templates/scene-object"
 SceneObjectPresenter = (object) ->
   SceneObjectTemplate Object.assign {}, object,
     style: ->
-      x = object.x()
-      y = object.y()
+      x = object.x()|0
+      y = object.y()|0
 
-      hw = object.img().width / 2
-      hh = object.img().height / 2
+      hw = Math.floor object.img().width / 2
+      hh = Math.floor object.img().height / 2
 
       "transform: matrix(1, 0, 0, 1, #{x}, #{y}); left: -#{hw}px; top: -#{hh}px"
 
