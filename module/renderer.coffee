@@ -18,6 +18,7 @@ SceneObjectView = (object) ->
       "transform: matrix(1, 0, 0, 1, #{x}, #{y}); left: -#{hw}px; top: -#{hh}px"
 
   element.view = self
+  element.object = object
   self.element = element
 
   return self
@@ -91,7 +92,11 @@ module.exports = (I, self) ->
     scene.appendChild view.element
 
   objectRemoved = (object) ->
+    toRemove = Array::filter.call scene.children, (element) ->
+      element.object is object
 
+    toRemove.forEach (element) ->
+      element.remove()
 
   self.currentRoom.observe (room) ->
     # Empty previous scene
