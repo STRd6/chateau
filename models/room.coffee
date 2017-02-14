@@ -80,6 +80,10 @@ module.exports = Room = (I={}, self=Model(I)) ->
 
   self.extend
     addProp: ({imageURL}) ->
+      if self.props().length >= 50
+        stats.increment "room.props-full"
+        return
+
       propsRef.push
         x: (Math.random() * 960)|0
         y: (Math.random() * 540)|0
