@@ -31,7 +31,7 @@ module.exports = Room = (I={}, self=Model(I)) ->
   membershipsRef = dataRef.child("memberships")
   propsRef = dataRef.child("props")
 
-  Prop = PropBase("rooms/#{self.key()}/props")
+  Prop = PropBase("room-data/#{self.key()}/props")
 
   subscribeToProp = (snap) ->
     stats.increment "room.subscribe-prop"
