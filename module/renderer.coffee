@@ -41,7 +41,7 @@ addDragHandling = (element) ->
     activeDrag = view
     view.element.classList.add "dragging"
 
-  element.addEventListener "mousemove", (e) ->
+  document.addEventListener "mousemove", (e) ->
     if activeDrag
       {clientX:prevX, clientY:prevY} = dragStart
       {clientX:x, clientY:y} = e
