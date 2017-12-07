@@ -8,3 +8,6 @@ dependencies:
   model: "distri/model:master"
   postmaster: "distri/postmaster:master"
   ui: "STRd6/ui:master"
+publish:
+  s3:
+    basePath: "public/danielx.net"
